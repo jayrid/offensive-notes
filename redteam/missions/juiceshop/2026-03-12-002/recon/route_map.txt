@@ -1,0 +1,48 @@
+--- Routes extracted from main.js (Angular route bundle) ---
+
+API ENDPOINTS:
+/api/Addresss
+/api/BasketItems
+/api/Cards
+/api/Challenges
+/api/Complaints
+/api/Deliverys
+/api/Feedbacks
+/api/Hints
+/api/Products
+/api/Quantitys
+/api/Recycles
+/api/SecurityAnswers
+/api/SecurityQuestions
+/api/Users
+
+REST ENDPOINTS:
+/rest/admin/*
+/rest/captcha
+/rest/chatbot
+/rest/continue-code
+/rest/country-mapping
+/rest/deluxe-membership
+/rest/image-captcha/
+/rest/memories
+/rest/order-history
+/rest/products
+/rest/saveLoginIp
+/rest/track-order
+/rest/user/authentication-details/
+/rest/user/change-password
+/rest/user/login
+/rest/user/reset-password
+/rest/user/security-question
+/rest/user/whoami
+/rest/wallet/balance
+
+OPEN DIRECTORIES CONFIRMED:
+/ftp/ — HTTP 200, directory listing, 11 files
+/encryptionkeys/ — HTTP 200, directory listing (jwt.pub, premium.key)
+/support/logs — HTTP 200, directory listing (access.log files, audit.json)
+
+ADDITIONAL ENDPOINTS:
+/metrics — HTTP 200, unauthenticated Prometheus metrics
+/graphql — HTTP 200, GraphQL endpoint
+/b2b/v2 — HTTP 401, JWT-authenticated API

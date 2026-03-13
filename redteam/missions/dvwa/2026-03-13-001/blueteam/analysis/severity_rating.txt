@@ -1,0 +1,16 @@
+=== INCIDENT SEVERITY RATING ===
+Overall Severity: CRITICAL
+
+Justification:
+- Access level achieved: www-data
+- Kill chain stages completed: 7 of 14 (Reconnaissance, Initial Access, Execution, Credential Access, Discovery, Collection, Exfiltration)
+- Data exfiltrated: YES (/etc/passwd, database user credentials, web application user hashes)
+- Persistence established: NO
+- Lateral movement: NO
+- Credentials compromised: YES (Admin web credentials, 5 user account hashes, MariaDB credentials)
+
+Severity Scale:
+  CRITICAL — root/admin access + credentials stolen or persistence established
+  HIGH — successful exploitation + user-level access
+  MEDIUM — failed exploitation or only recon/scan completed
+  LOW — passive recon only, no exploitation

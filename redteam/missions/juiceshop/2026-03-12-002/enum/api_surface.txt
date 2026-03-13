@@ -1,0 +1,42 @@
+--- API Surface Enumeration ---
+
+AUTHENTICATED ENDPOINTS (require JWT):
+/api/Users         — HTTP 401 unauthenticated; UNION SQLi dump bypassed auth requirement
+/api/BasketItems   — basket contents, needs auth
+/rest/basket/:id   — IDOR target, needs auth token
+
+UNAUTHENTICATED ENDPOINTS (no auth required):
+/api/Products      — full product catalog, 40+ items enumerated
+/api/Challenges    — 111 challenges, categories revealed
+/api/SecurityQuestions — all 14 security questions
+/rest/user/whoami  — returns {"user":{}} (no error, just empty)
+/rest/user/security-question?email= — reveals security question by email
+/rest/admin/application-configuration — CRITICAL: full config, NO AUTH
+/metrics           — Prometheus metrics, NO AUTH
+/ftp/              — open directory, NO AUTH
+/encryptionkeys/   — open directory, NO AUTH
+/support/logs      — open directory with access logs + audit.json, NO AUTH
+
+CHALLENGE CATEGORIES (111 total):
+16 Sensitive Data Exposure
+12 Improper Input Validation
+11 Broken Access Control
+11 Injection
+ 9 XSS
+ 9 Vulnerable Components
+ 9 Broken Authentication
+ 7 Miscellaneous
+ 5 Cryptographic Issues
+ 4 Observability Failures
+ 4 Broken Anti Automation
+ 4 Security Misconfiguration
+ 3 Security through Obscurity
+ 3 Insecure Deserialization
+ 2 Unvalidated Redirects
+ 2 XXE
+
+GRAPHQL:
+/graphql — endpoint live (HTTP 200)
+Status: Introspection via curl returns HTML (possible middleware issue)
+Note: GraphQL likely routes through Angular SPA catch-all — needs Accept: application/json header
+Schema: Not fully enumerated in this phase — defer to manual exploitation

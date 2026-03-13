@@ -1,0 +1,34 @@
+--- FTP Directory Enumeration Results ---
+
+CONFIRMED DOWNLOADS:
+1. /ftp/acquisitions.md
+   Content: Confidential acquisition plans document (internal M&A strategy)
+   Access: Direct HTTP GET (no bypass needed)
+
+2. /ftp/incident-support.kdbx
+   Content: KeePass credential database (binary, 3.2KB)
+   Downloaded to: loot/incident-support.kdbx
+   Access: Direct HTTP GET (no bypass needed)
+
+3. package.json.bak (via null-byte bypass)
+   URL: /ftp/package.json.bak%2500.md
+   App name: juice-shop, Version: 6.2.0-SNAPSHOT
+   Key dependencies (outdated): express ~4.16, express-jwt 0.1.3,
+   epilogue-js ~0.7, hashids ~1.1, helmet ~3.9, jquery (CDN): 2.2.4
+
+NULL BYTE BYPASS CONFIRMED:
+- Direct access to .bak files returns: "Only .md and .pdf files are allowed!"
+- Appending %2500.md (URL-encoded null byte + .md extension) bypasses filter
+- Pattern: /ftp/<filename>.bak%2500.md returns HTTP 200
+
+OTHER FTP FILES (accessible):
+- eastere.gg — easter egg file
+- legal.md — terms/legal document
+- suspicious_errors.yml — error configuration YAML
+- coupons_2013.md.bak — old coupon codes (accessible via null byte bypass)
+- encrypt.pyc — compiled Python encryption script
+- announcement_encrypted.md — encrypted announcement
+
+SECURITY ISSUE:
+All FTP files accessible without authentication.
+robots.txt disallows /ftp but this provides no security — it's advisory only.

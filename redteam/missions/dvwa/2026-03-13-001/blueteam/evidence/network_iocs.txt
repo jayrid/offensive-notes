@@ -1,0 +1,8 @@
+=== NETWORK IOCs ===
+Attacker IPs: lab-attacker
+Target IPs/Hosts: 10.10.30.129
+Open Ports Exploited: 80
+Services Targeted: Apache/2.4.25 (Debian)
+URIs/Paths Accessed: /login.php, /vulnerabilities/sqli/, /vulnerabilities/exec/, /vulnerabilities/xss_r/, /config/config.inc.php.bak, /phpinfo.php, /dvwa/
+Protocols Used: HTTP, ICMP
+External Connections: None

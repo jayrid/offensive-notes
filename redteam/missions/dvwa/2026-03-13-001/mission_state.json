@@ -1,0 +1,32 @@
+{
+  "mission_id": "2026-03-13-001",
+  "mission_dir": "/home/jayrid/RedTeam/missions/dvwa/2026-03-13-001",
+  "target": "10.10.30.129",
+  "target_type": "dvwa",
+  "current_phase": "report",
+  "status": "completed",
+  "started_at": "2026-03-13T02:10:00Z",
+  "updated_at": "2026-03-13T02:45:00Z",
+  "completed_phases": ["recon", "scan", "enum", "exploit", "postex", "report"],
+  "failed_phase": null,
+  "plan_loaded": true,
+  "allowed_attack_types": [
+    "reconnaissance",
+    "enumeration",
+    "injection",
+    "exploitation",
+    "fuzzing"
+  ],
+  "out_of_scope": [
+    "Any systems or IP addresses other than 10.10.30.129",
+    "Brute force attacks against user credentials",
+    "Privilege escalation beyond the web application layer",
+    "Lateral movement to other hosts",
+    "Persistent backdoor installation",
+    "File upload exploitation",
+    "CSRF attacks",
+    "Denial of service or resource exhaustion"
+  ],
+  "max_exploits": 4,
+  "confirmed_exploit_count": 4
+}

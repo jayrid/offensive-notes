@@ -1,0 +1,77 @@
+{
+  "incident_id": "BT-2026-03-12-003",
+  "mission_ref": "2026-03-12-003",
+  "target": "10.10.30.130",
+  "target_app": "OWASP Juice Shop v19.2.0-SNAPSHOT",
+  "target_port": 3000,
+  "attack_type": "IDOR / Broken Access Control",
+  "attacker_ip": "10.10.1.50",
+  "attacker_account": "idortest@pwn.lab (User ID 24, Basket ID 7)",
+  "incident_status": "closed",
+  "severity": "CRITICAL",
+  "pipeline_phase": "complete",
+  "opened_at": "2026-03-13T00:00:00Z",
+  "updated_at": "2026-03-13T00:00:00Z",
+  "mission_start": "2026-03-12T00:00:00Z",
+  "mission_end": "2026-03-12T00:25:00Z",
+  "alert_source": "blueteam/alerts.log + mission artifacts",
+  "alert_count": 0,
+  "suricata_coverage": "NOT ACTIVE during mission window (2026-03-12) — alerts.log begins 2026-03-13T02:04",
+  "known_exploits": [
+    {
+      "id": "EX-001",
+      "type": "IDOR Read",
+      "endpoint": "GET /rest/basket/1",
+      "attacker_user_id": 24,
+      "victim_user_id": 1,
+      "victim_email": "admin@juice-sh.op",
+      "result": "HTTP 200 — full admin basket returned"
+    },
+    {
+      "id": "EX-002",
+      "type": "IDOR Write",
+      "endpoint": "PUT /api/BasketItems/4",
+      "attacker_user_id": 24,
+      "victim_user_id": 2,
+      "victim_email": "jim@juice-sh.op",
+      "modification": "quantity 2 -> 5",
+      "result": "HTTP 200 — basket item permanently modified"
+    },
+    {
+      "id": "EX-003",
+      "type": "IDOR Read",
+      "endpoint": "GET /rest/basket/3",
+      "attacker_user_id": 24,
+      "victim_user_id": 3,
+      "victim_email": "bender@juice-sh.op",
+      "result": "HTTP 200 — peer customer basket exposed"
+    }
+  ],
+  "additional_vectors": [
+    "GET /api/BasketItems — full cross-user item leak with any valid JWT",
+    "GET /rest/track-order/:id — cross-user order tracking exposure"
+  ],
+  "affected_users": [
+    "admin@juice-sh.op (User 1)",
+    "jim@juice-sh.op (User 2)",
+    "bender@juice-sh.op (User 3)",
+    "amy@juice-sh.op (User 11)",
+    "uvogin@juice-sh.op (User 16)",
+    "testidor2@juice-sh.op (User 23)"
+  ],
+  "evidence_collected": [
+    "blueteam/alerts/alert_summary.txt",
+    "blueteam/alerts/high_severity.json",
+    "blueteam/evidence/artifact_manifest.txt",
+    "blueteam/evidence/network_iocs.txt",
+    "blueteam/evidence/attack_indicators.txt",
+    "blueteam/analysis/mitre_mapping.txt",
+    "blueteam/analysis/severity_rating.txt",
+    "blueteam/analysis/ioc_list.txt",
+    "blueteam/analysis/threat_assessment.md",
+    "blueteam/reports/incident_report.md",
+    "blueteam/reports/defensive_recommendations.md"
+  ],
+  "report_path": "blueteam/reports/incident_report.md",
+  "notes": "Suricata was not monitoring during the 2026-03-12 mission window. Analysis based on mission artifacts: timeline.log, loot/basket_dump.json, notes/notes.md, report/mission_report.md."
+}

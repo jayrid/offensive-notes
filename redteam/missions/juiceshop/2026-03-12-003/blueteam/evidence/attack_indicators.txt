@@ -1,0 +1,71 @@
+=== HOST-BASED ATTACK INDICATORS ===
+Attack Timeline:
+  recon: 2026-03-12T00:01:00Z - 00:05:00Z
+  scan: 2026-03-12T00:06:00Z - 00:08:00Z
+  enum: 2026-03-12T00:09:00Z - 00:12:00Z
+  exploit: 2026-03-12T00:13:00Z - 00:18:00Z
+  postex: 2026-03-12T00:19:00Z - 00:21:00Z
+
+Tools Used by Attacker:
+  curl: Web request generation
+  python3: JWT/JSON processing
+  admin JWT: Initial reconnaissance and enumeration
+
+Commands of Interest:
+  curl -X POST /api/Users (phase: recon/enum)
+  curl -X POST /rest/user/login (phase: enum)
+  curl GET /rest/basket/1 (phase: exploit)
+  curl PUT /api/BasketItems/4 (phase: exploit)
+  curl GET /rest/basket/3 (phase: exploit)
+
+Files Accessed or Modified:
+  /rest/basket/1 (action: read)
+  /api/BasketItems/4 (action: write - item modification)
+  /rest/basket/3 (action: read)
+  /api/BasketItems (action: read)
+  /rest/track-order/:id (action: read)
+
+Credentials Harvested:
+  admin@juice-sh.op:admin123 (source: notes.md)
+  idortest@pwn.lab: User ID 24 (source: mission_report.md)
+  Jim, Bender, Amy, Uvogin: User emails and IDs leaked (source: basket_dump.json)
+
+Privilege Escalation:
+  Access achieved: Customer (User 24)
+  Method (if known): No privilege escalation required; IDOR vulnerability bypassed access controls.
+
+Persistence Mechanisms:
+  None identified in postex artifacts.
+
+=== ALERT-EVIDENCE CORRELATION ===
+Alert: unauthorized_admin_login — Unauthorized administrative login
+  Supporting evidence: timeline.log at 00:01:00Z, recon phase
+  Corroborated: YES
+
+Alert: massive_user_enum — Massive user enumeration via /api/Users
+  Supporting evidence: notes.md (22 users enumerated), recon findings
+  Corroborated: YES
+
+Alert: sequential_id_enum — Sequential ID enumeration on /rest/basket/:id
+  Supporting evidence: notes.md (baskets 1-7 tested), enum findings
+  Corroborated: YES
+
+Alert: idor_admin_read — IDOR exploit: Unauthorized read of admin basket
+  Supporting evidence: mission_report.md (Exploit 1), basket_dump.json (Basket ID 1)
+  Corroborated: YES
+
+Alert: idor_write — IDOR exploit: Unauthorized modification of Jim's basket item
+  Supporting evidence: mission_report.md (Exploit 2), basket_dump.json (Basket ID 2 modified qty)
+  Corroborated: YES
+
+Alert: idor_customer_read — IDOR exploit: Unauthorized read of customer basket (Bender)
+  Supporting evidence: mission_report.md (Exploit 3), basket_dump.json (Basket ID 3)
+  Corroborated: YES
+
+Alert: mass_exfiltration — Mass exfiltration on 6 user baskets
+  Supporting evidence: basket_dump.json (6 baskets dumped), postex findings
+  Corroborated: YES
+
+Alert: order_leak — Cross-user information leak on /rest/track-order/:id
+  Supporting evidence: notes.md, mission_report.md
+  Corroborated: YES

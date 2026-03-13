@@ -1,0 +1,15 @@
+--- robots.txt ---
+User-agent: *
+Disallow: /ftp
+
+Notes: /ftp disallowed by robots.txt — confirms open directory exists. Standard recon finding.
+
+--- sitemap.xml ---
+Not present (returns HTML SPA index — Angular routing, no traditional sitemap)
+
+--- Technology Fingerprint ---
+Framework: Angular (SPA — single index.html with main.js, polyfills.js, vendor.js)
+Backend: Node.js / Express
+App: OWASP Juice Shop 17.x (based on copyright 2014-2026 in index.html)
+CDN Dependencies: cloudflare.com/ajax/libs (cookieconsent2/3.1.0, jquery/2.2.4)
+jQuery version: 2.2.4 (EOL — multiple known XSS/prototype pollution vulns in this version)

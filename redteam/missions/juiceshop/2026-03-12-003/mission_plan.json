@@ -1,0 +1,14 @@
+{
+  "mission_id": "2026-03-12-003",
+  "created_at": "2026-03-12T00:00:00Z",
+  "status": "planned",
+  "target": "10.10.30.130",
+  "target_type": "juiceshop",
+  "target_port": 3000,
+  "challenge_id": "idor_basket_access",
+  "goal": "Access other users' baskets via IDOR",
+  "endpoint": "/rest/basket/:id",
+  "allowed_attack_types": ["idor", "enumeration"],
+  "max_exploits": 3,
+  "mission_dir": "/home/jayrid/RedTeam/missions/juiceshop/2026-03-12-003"
+}

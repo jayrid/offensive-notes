@@ -1,0 +1,40 @@
+{
+  "incident_id": "INC-2026-03-12-001",
+  "mission_ref": "2026-03-12-001",
+  "target": "10.10.30.130:3000",
+  "target_application": "OWASP Juice Shop v19.2.0-SNAPSHOT",
+  "controller": "blueteam-master",
+  "initiated_at": "2026-03-13T15:37:17Z",
+  "status": "pipeline_active",
+  "current_phase": "complete",
+  "phases_completed": ["monitoring", "analysis", "collection", "reporting"],
+  "severity": "CRITICAL",
+  "confirmed_threats": [
+    {"alert_id": "ALT-001", "description": "SQLi Login Authentication Bypass", "severity": "CRITICAL", "cvss": 9.8, "owasp": "A03:2021"},
+    {"alert_id": "ALT-002", "description": "SQLi UNION Credential Dump (22 accounts)", "severity": "CRITICAL", "cvss": 9.8, "owasp": "A03:2021"},
+    {"alert_id": "ALT-003", "description": "Null Byte Path Traversal + KeePass Exfil", "severity": "HIGH", "cvss": 7.5, "owasp": "A02/A05:2021"},
+    {"alert_id": "ALT-004", "description": "Stored XSS via Product Review API", "severity": "HIGH", "cvss": 8.2, "owasp": "A03:2021"},
+    {"alert_id": "ALT-005", "description": "Open FTP Directory Listing", "severity": "HIGH", "cvss": 7.5, "owasp": "A05:2021"},
+    {"alert_id": "ALT-006", "description": "IDOR on User Baskets", "severity": "HIGH", "cvss": 7.5, "owasp": "A01:2021"},
+    {"alert_id": "ALT-007", "description": "Unauthenticated Prometheus Metrics", "severity": "MEDIUM", "cvss": 5.3, "owasp": "A05:2021"},
+    {"alert_id": "ALT-008", "description": "Unauthenticated Admin Configuration Endpoint", "severity": "HIGH", "cvss": 7.8, "owasp": "A01:2021"}
+  ],
+  "evidence_collected": [
+    "exploit/exploit_01_sqli_login_bypass.md",
+    "exploit/exploit_02_sensitive_data_ftp.md",
+    "exploit/exploit_03_persisted_xss_reviews.md",
+    "exploit/exploit_04_sqli_credential_dump.md",
+    "report/mission_report.md",
+    "report/walkthrough.md",
+    "postex/postex_findings.md",
+    "recon/application_fingerprint.md",
+    "recon/attack_surface_map.md",
+    "recon/host_discovery.md",
+    "loot/credentials.md",
+    "notes/notes.md",
+    "mission_state.json",
+    "timeline.log"
+  ],
+  "report_path": "report/blueteam_incident_report.md",
+  "notes": "Blue team pipeline initiated against completed red team mission 2026-03-12-001. Suricata not running; monitoring phase will analyze mission artifacts (exploit docs, timeline, notes). Source: /home/jayrid/RedTeam/missions/juiceshop/2026-03-12-001/"
+}

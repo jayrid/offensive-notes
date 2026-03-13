@@ -1,0 +1,162 @@
+{
+  "incident_id": "BT-2026-03-12-002",
+  "mission_ref": "2026-03-12-002",
+  "target": "10.10.30.130",
+  "target_port": 3000,
+  "target_application": "OWASP Juice Shop v19.2.0-SNAPSHOT",
+  "mission_dir": "/home/jayrid/RedTeam/missions/juiceshop/2026-03-12-002",
+  "created_at": "2026-03-13T00:22:40Z",
+  "updated_at": "2026-03-13T00:36:27Z",
+  "blueteam_initiated_at": "2026-03-13T01:00:00Z",
+  "overall_status": "analysis_complete",
+  "overall_risk": "CRITICAL",
+  "pipeline_status": {
+    "monitoring": "complete",
+    "analysis": "complete",
+    "evidence_collection": "complete",
+    "reporting": "pending"
+  },
+  "alerts": [
+    {
+      "alert_id": "ALT-001",
+      "type": "sql_injection",
+      "source_endpoint": "POST /rest/user/login",
+      "payload": "' OR 1=1--",
+      "severity": "critical",
+      "cvss": 9.8,
+      "owasp": "A03:2021",
+      "exploit_id": "EXP-01",
+      "confirmed": true
+    },
+    {
+      "alert_id": "ALT-002",
+      "type": "sensitive_data_exposure",
+      "source_endpoint": "GET /ftp/",
+      "payload": "Unauthenticated directory listing; null-byte bypass %2500",
+      "severity": "high",
+      "cvss": 7.5,
+      "owasp": "A01:2021 / A02:2021",
+      "exploit_id": "EXP-02",
+      "confirmed": true
+    },
+    {
+      "alert_id": "ALT-003",
+      "type": "sql_injection",
+      "source_endpoint": "GET /rest/products/search",
+      "payload": "UNION SELECT from Users",
+      "severity": "critical",
+      "cvss": 9.8,
+      "owasp": "A03:2021",
+      "exploit_id": "EXP-03",
+      "confirmed": true
+    },
+    {
+      "alert_id": "ALT-004",
+      "type": "stored_xss",
+      "source_endpoint": "PUT /rest/products/1/reviews",
+      "payload": "<iframe src=\"javascript:alert(`xss`)\">",
+      "severity": "high",
+      "cvss": 8.2,
+      "owasp": "A03:2021",
+      "exploit_id": "EXP-04",
+      "confirmed": true
+    },
+    {
+      "alert_id": "ALT-005",
+      "type": "jwt_algorithm_confusion",
+      "source_endpoint": "GET /api/Users; /rest/admin/application-configuration",
+      "payload": "Forged HS256 JWT signed with exposed RSA public key",
+      "severity": "critical",
+      "cvss": 9.1,
+      "owasp": "A02:2021",
+      "exploit_id": "EXP-05",
+      "confirmed": true
+    },
+    {
+      "alert_id": "ALT-006",
+      "type": "security_misconfiguration",
+      "source_endpoint": "GET /rest/admin/application-configuration",
+      "payload": "Unauthenticated access to full admin config JSON",
+      "severity": "high",
+      "cvss": 7.5,
+      "owasp": "A05:2021",
+      "exploit_id": null,
+      "confirmed": true
+    },
+    {
+      "alert_id": "ALT-007",
+      "type": "open_directories",
+      "source_endpoint": "/encryptionkeys/, /support/logs, /ftp/",
+      "payload": "Unauthenticated directory listings exposing key material and logs",
+      "severity": "high",
+      "cvss": 7.5,
+      "owasp": "A05:2021",
+      "exploit_id": null,
+      "confirmed": true
+    }
+  ],
+  "threat_analysis": {
+    "analyst_agent": "blueteam-threat-analyst",
+    "completed_at": "2026-03-13T01:05:00Z",
+    "severity_rating": "CRITICAL",
+    "attack_chain": [
+      "Recon: /encryptionkeys/jwt.pub and /support/logs exposed unauthenticated",
+      "Enum: RSA public key retrieved; UNION SQLi confirms 22 user accounts with MD5 hashes",
+      "Exploit: JWT algorithm confusion (HS256 with public key) → admin token forged without credentials",
+      "Exploit: SQLi login bypass → admin JWT via tautology injection",
+      "Exploit: UNION credential dump → 22 accounts exfiltrated",
+      "Exploit: Stored XSS → payload persists in product reviews; no CSP",
+      "Exploit: FTP open directory + null-byte bypass → KeePass DB and M&A documents downloaded"
+    ],
+    "primary_vector": "JWT Algorithm Confusion (no credentials required; public key openly accessible)",
+    "blast_radius": "Full application compromise — admin access, all user credentials, sensitive documents, non-expiring forged token"
+  },
+  "evidence": {
+    "collector_agent": "blueteam-evidence-collector",
+    "artifacts": [
+      {"type": "exploit_proof", "path": "exploit/EXP-01_sqli_login_bypass.txt"},
+      {"type": "exploit_proof", "path": "exploit/EXP-02_ftp_sensitive_data.txt"},
+      {"type": "exploit_proof", "path": "exploit/EXP-03_sqli_union_dump.txt"},
+      {"type": "exploit_proof", "path": "exploit/EXP-04_stored_xss.txt"},
+      {"type": "exploit_proof", "path": "exploit/EXP-05_jwt_algorithm_confusion.txt"},
+      {"type": "key_material", "path": "recon/encryptionkeys.txt"},
+      {"type": "credential_dump", "path": "enum/user_dump.txt"},
+      {"type": "binary_artifact", "path": "loot/incident-support.kdbx"},
+      {"type": "api_map", "path": "enum/api_surface.txt"},
+      {"type": "vulnerability_scan", "path": "scan/vulnerability_scan.txt"},
+      {"type": "mission_timeline", "path": "timeline.log"},
+      {"type": "mission_report", "path": "report/mission_report.md"}
+    ],
+    "loot_confirmed": [
+      "Admin JWT (SQLi login bypass)",
+      "Admin JWT (forged HS256 — non-expiring)",
+      "RSA public key (jwt.pub)",
+      "22 user MD5 hashes",
+      "incident-support.kdbx (KeePass DB)",
+      "acquisitions.md (confidential M&A document)",
+      "Full application configuration JSON",
+      "Security Q&A answers (geo-stalking data)"
+    ]
+  },
+  "findings": [
+    {"id": "F-01", "title": "SQL Injection — Login Authentication Bypass", "severity": "CRITICAL", "cvss": 9.8, "owasp": "A03:2021"},
+    {"id": "F-02", "title": "Sensitive Data Exposure — Open FTP + Null Byte Bypass", "severity": "HIGH", "cvss": 7.5, "owasp": "A01/A02:2021"},
+    {"id": "F-03", "title": "SQL Injection — UNION Credential Dump (22 accounts)", "severity": "CRITICAL", "cvss": 9.8, "owasp": "A03:2021"},
+    {"id": "F-04", "title": "Stored XSS — Product Review API", "severity": "HIGH", "cvss": 8.2, "owasp": "A03:2021"},
+    {"id": "F-05", "title": "JWT Algorithm Confusion — RS256 to HS256 Token Forgery", "severity": "CRITICAL", "cvss": 9.1, "owasp": "A02:2021"},
+    {"id": "F-06", "title": "Unauthenticated Admin Configuration Endpoint", "severity": "HIGH", "cvss": 7.5, "owasp": "A05:2021"},
+    {"id": "F-07", "title": "Open Directories — /encryptionkeys/, /support/logs", "severity": "HIGH", "cvss": 7.5, "owasp": "A05:2021"}
+  ],
+  "critical_remediations": [
+    "Enforce RS256-only JWT validation; reject alg:HS256 and alg:none; remove /encryptionkeys/ from web root",
+    "Parameterize all SQL queries in /rest/user/login and /rest/products/search",
+    "Replace MD5 password hashing with bcrypt or Argon2",
+    "Require authentication on all /rest/admin/* endpoints",
+    "Disable directory listing on all web-accessible paths; move sensitive files outside web root",
+    "Apply output encoding to all user-generated content; implement strict CSP",
+    "Remove access logs and audit.json from public web paths"
+  ],
+  "report_status": "complete",
+  "report_path": "/home/jayrid/RedTeam/missions/juiceshop/2026-03-12-002/bt_incident_report.md",
+  "notes": "No live Suricata eve.json available — lab environment without IDS. Pipeline operating in artifact-analysis mode against completed red team mission artifacts."
+}

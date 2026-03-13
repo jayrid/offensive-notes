@@ -1,0 +1,165 @@
+{
+  "last_updated": "2026-03-13T03:00:00Z",
+  "targets": {
+    "10.10.30.130": {
+      "target_type": "web_application",
+      "application": "OWASP Juice Shop",
+      "mission_count": 3,
+      "completed_challenge_ids": [
+        "admin_login_sql_injection",
+        "sensitive_file_exposure",
+        "stored_xss_review",
+        "idor_basket_access",
+        "jwt_algorithm_confusion"
+      ],
+      "completed_missions": [
+        {
+          "mission_id": "2026-03-12-001",
+          "planned_at": "2026-03-12T19:42:22Z",
+          "completed_at": "2026-03-12T20:12:00Z",
+          "status": "completed",
+          "challenge_id": "admin_login_sql_injection",
+          "exploited_vulnerabilities": [
+            "SQL Injection — Login Authentication Bypass (A03:2021)",
+            "SQL Injection — UNION Credential Dump (A03:2021)",
+            "Sensitive Data Exposure — Open FTP Directory + Null Byte Bypass (A02:2021 / A05:2021)",
+            "Persisted XSS — Product Review API (A03:2021)"
+          ],
+          "attack_types_used": [
+            "injection",
+            "enumeration",
+            "exploitation",
+            "fuzzing"
+          ],
+          "learning_objectives_covered": [
+            "SQL injection login bypass via tautological OR condition",
+            "Sensitive file disclosure via open directory listing and null byte bypass",
+            "Persisted XSS via unsanitized user input in review API",
+            "UNION-based SQL injection for full credential exfiltration from SQLite"
+          ]
+        },
+        {
+          "mission_id": "2026-03-12-002",
+          "mission_dir": "/home/jayrid/RedTeam/missions/juiceshop/2026-03-12-002",
+          "planned_at": "2026-03-12T19:22:00Z",
+          "completed_at": "2026-03-13T00:36:27Z",
+          "status": "completed",
+          "challenge_id": "jwt_algorithm_confusion",
+          "exploited_vulnerabilities": [
+            "SQL Injection — Login Authentication Bypass (A03:2021)",
+            "Sensitive Data Exposure — Open FTP Directory + Null Byte Bypass (A01:2021 / A02:2021)",
+            "SQL Injection — UNION Credential Dump (A03:2021)",
+            "Stored XSS — Product Review API (A03:2021)",
+            "JWT Algorithm Confusion — RS256 to HS256 Token Forgery (A02:2021)"
+          ],
+          "attack_types_used": [
+            "reconnaissance",
+            "enumeration",
+            "injection",
+            "exploitation",
+            "fuzzing"
+          ],
+          "learning_objectives_covered": [
+            "JWT algorithm confusion: forge admin token by signing HS256 with exposed RSA public key",
+            "Sensitive file disclosure via open directory listing and null byte bypass",
+            "UNION-based SQL injection for full credential exfiltration from SQLite",
+            "Stored XSS persistence via unsanitized product review API",
+            "Unauthenticated admin configuration endpoint disclosure"
+          ]
+        },
+        {
+          "mission_id": "2026-03-12-003",
+          "mission_dir": "/home/jayrid/RedTeam/missions/juiceshop/2026-03-12-003",
+          "planned_at": "2026-03-12T00:00:00Z",
+          "completed_at": "2026-03-12T00:25:00Z",
+          "status": "completed",
+          "challenge_id": "idor_basket_access",
+          "exploited_vulnerabilities": [
+            "IDOR Read — Basket Access via Sequential ID (A01:2021)",
+            "IDOR Write — Basket Item Quantity Modification (A01:2021)",
+            "Mass Data Leak — /api/BasketItems Cross-User Exposure (A01:2021)"
+          ],
+          "attack_types_used": [
+            "idor",
+            "enumeration"
+          ],
+          "learning_objectives_covered": [
+            "IDOR via sequential integer resource IDs in REST API",
+            "Difference between authentication and authorization checks",
+            "IDOR write impact via PUT endpoint with no ownership validation",
+            "Mass enumeration through unfiltered list endpoints (/api/BasketItems)"
+          ]
+        }
+      ],
+      "all_exploited_vulnerabilities": [
+        "SQL Injection — Login Authentication Bypass (A03:2021)",
+        "SQL Injection — UNION Credential Dump (A03:2021)",
+        "Sensitive Data Exposure — Open FTP Directory + Null Byte Bypass (A02:2021 / A05:2021)",
+        "Persisted XSS — Product Review API (A03:2021)",
+        "JWT Algorithm Confusion — RS256 to HS256 Token Forgery (A02:2021)",
+        "IDOR Read — Basket Access via Sequential ID (A01:2021)",
+        "IDOR Write — Basket Item Quantity Modification (A01:2021)",
+        "Mass Data Leak — /api/BasketItems Cross-User Exposure (A01:2021)"
+      ],
+      "all_attack_types_used": [
+        "injection",
+        "enumeration",
+        "exploitation",
+        "fuzzing",
+        "reconnaissance",
+        "idor"
+      ]
+    },
+    "10.10.30.129": {
+      "target_type": "web_application",
+      "application": "DVWA",
+      "mission_count": 1,
+      "completed_challenge_ids": [
+        "sql_injection_union",
+        "command_injection_pipe",
+        "reflected_xss_greeting",
+        "sensitive_data_exposure_config"
+      ],
+      "completed_missions": [
+        {
+          "mission_id": "2026-03-13-001",
+          "mission_dir": "/home/jayrid/RedTeam/missions/dvwa/2026-03-13-001",
+          "planned_at": "2026-03-13T02:05:08Z",
+          "completed_at": "2026-03-13T02:45:00Z",
+          "status": "completed",
+          "challenge_id": null,
+          "exploited_vulnerabilities": [
+            "SQL Injection — UNION-based Credential Dump (A03:2021)",
+            "OS Command Injection — Pipe-based Execution (A03:2021)",
+            "Reflected XSS — Session Hijacking PoC (A03:2021)",
+            "Sensitive Data Exposure — Public Config Backup (A05:2021)"
+          ],
+          "attack_types_used": [
+            "injection",
+            "enumeration",
+            "exploitation",
+            "reconnaissance"
+          ],
+          "learning_objectives_covered": [
+            "UNION-based SQL injection for data extraction from MariaDB",
+            "OS command injection via shell metacharacters in PHP wrappers",
+            "Reflected XSS and session cookie security (HttpOnly flag)",
+            "Impact of directory listing and insecure backup file retention"
+          ]
+        }
+      ],
+      "all_exploited_vulnerabilities": [
+        "SQL Injection — UNION-based Credential Dump (A03:2021)",
+        "OS Command Injection — Pipe-based Execution (A03:2021)",
+        "Reflected XSS — Session Hijacking PoC (A03:2021)",
+        "Sensitive Data Exposure — Public Config Backup (A05:2021)"
+      ],
+      "all_attack_types_used": [
+        "injection",
+        "enumeration",
+        "exploitation",
+        "reconnaissance"
+      ]
+    }
+  }
+}

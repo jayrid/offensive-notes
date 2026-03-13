@@ -1,0 +1,28 @@
+=== INDICATORS OF COMPROMISE ===
+Generated: "2026-03-13T15:45:35Z"
+
+Network IOCs:
+  IP Addresses: lab-attacker, 10.10.30.129
+  Domains/Hostnames: None
+  Ports/Protocols: 80 (HTTP), ICMP (connectivity checks)
+  URIs/Paths: /login.php, /vulnerabilities/sqli/, /vulnerabilities/exec/, /vulnerabilities/xss_r/, /config/config.inc.php.bak, /phpinfo.php, /dvwa/
+
+Host IOCs:
+  Tools Deployed: nmap (scanner), curl (exploitation tool)
+  Commands Executed (key ones):
+    - 999' UNION SELECT user,password FROM users-- -
+    - ip=127.0.0.1|id
+    - ip=127.0.0.1|cat /etc/passwd
+    - <script>alert(document.cookie)</script>
+  Files Modified/Accessed:
+    - /etc/passwd (read access via CMDi)
+    - /var/www/html/config/config.inc.php.bak (read access via Sensitive Data Disclosure)
+  Credentials Compromised: 
+    - Admin/password (Initial login)
+    - MariaDB credentials (app/vulnerables from config backup)
+    - 5 Web user hashes (admin, gordonb, 1337, pablo, smithy)
+  Registry/Config Changes: None
+
+Behavioral IOCs:
+  Attack pattern summary: Systematic discovery of web application vulnerabilities on port 80, followed by the sequential exploitation of SQLi, OS Command Injection, and Reflected XSS. The attacker focused on data exfiltration of sensitive configuration files and user account databases.
+  Time window: 2026-03-13T02:10:00Z to 2026-03-13T02:40:00Z

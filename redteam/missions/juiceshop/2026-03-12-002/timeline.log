@@ -1,0 +1,16 @@
+2026-03-13T00:22:40Z [MASTER] MISSION STARTED | Target: 10.10.30.130 | Type: juiceshop | Mission ID: 2026-03-12-002
+2026-03-13T00:22:40Z [MASTER] MISSION PLAN LOADED | allowed_attack_types: reconnaissance, enumeration, vulnerability_scanning, injection, fuzzing, exploitation, brute_force | max_exploits: 5 | out_of_scope: DoS, persistent_backdoor, ransomware, social_engineering, lateral_movement, data_destruction, off-target_hosts
+2026-03-13T00:22:48Z [MASTER] PHASE STARTED: recon
+2026-03-13T00:24:43Z [MASTER] PHASE COMPLETED: recon | Findings: CORS wildcard confirmed; 3 open directories (/ftp/, /encryptionkeys/, /support/logs); 11 FTP files including KeePass DB; JWT RSA public key exposed; unauthenticated Prometheus metrics; 21 API/REST endpoints mapped from main.js; jQuery 2.2.4 (EOL); no WAF detected
+2026-03-13T00:25:01Z [MASTER] PHASE STARTED: scan
+2026-03-13T00:26:58Z [MASTER] PHASE COMPLETED: scan | Findings: /rest/admin/application-configuration returns full config without auth (CRITICAL); 3 open directories confirmed; GraphQL live; no CSP header; no WAF; /rest/products/search SQLi surface confirmed; geo-stalking security answers leaked in app-config response; confirmed_exploit_count remains 0 (no exploitation yet)
+2026-03-13T00:27:17Z [MASTER] PHASE STARTED: enum
+2026-03-13T00:30:02Z [MASTER] PHASE COMPLETED: enum | Findings: JWT RSA public key retrieved (/encryptionkeys/jwt.pub) — HS256 confusion attack ready; SQLi UNION dump successful — 20 users and MD5 hashes extracted including admin@juice-sh.op:admin123; FTP null-byte bypass confirmed (%2500.md); KeePass DB downloaded to loot/; security Q&A answers leaked from app-config (Q14=Daniel Boone National Forest, Q10=ITsec); 111 challenges enumerated (11 Injection, 9 XSS, 11 Broken Access Control); premium.key retrieved from encryptionkeys
+2026-03-13T00:30:31Z [MASTER] PHASE STARTED: exploit | max_exploits: 5 | confirmed_exploit_count: 0 | Constraint check: all planned exploits (SQLi login, SQLi UNION, FTP open dir, JWT HS256, XSS) fall within allowed_attack_types (injection, exploitation)
+2026-03-13T00:31:39Z [MASTER] EXP-01 CONFIRMED: SQL Injection Login Bypass | POST /rest/user/login with OR 1=1-- | Admin JWT obtained | confirmed_exploit_count: 1/5
+2026-03-13T00:32:43Z [MASTER] EXP-02 CONFIRMED: Sensitive Data Exposure — Open FTP Directory | acquisitions.md, legal.md, incident-support.kdbx downloaded without auth | Null-byte bypass confirmed for .bak files | confirmed_exploit_count: 2/5
+2026-03-13T00:33:18Z [MASTER] EXP-03 CONFIRMED: SQLi UNION SELECT User Dump | GET /rest/products/search?q=UNION payload | 22 user accounts and MD5 hashes extracted unauthenticated | confirmed_exploit_count: 3/5
+2026-03-13T00:33:58Z [MASTER] EXP-04 CONFIRMED: Stored XSS via Product Review | PUT /rest/products/1/reviews with iframe javascript payload | Payload persists and returned unsanitized in GET response | confirmed_exploit_count: 4/5
+2026-03-13T00:35:59Z [MASTER] EXP-05 CONFIRMED: JWT Algorithm Confusion RS256→HS256 | Forged admin token accepted | /api/Users returned 22 users with forged HS256 token | confirmed_exploit_count: 5/5
+2026-03-13T00:35:59Z [MASTER] MISSION GOAL SATISFIED | confirmed_exploits: 5 / max_exploits: 5 | Proceeding to post-exploitation.
+2026-03-13T00:36:27Z [MASTER] PHASE STARTED: postex

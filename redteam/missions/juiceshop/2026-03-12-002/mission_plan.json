@@ -1,0 +1,44 @@
+{
+  "mission_id": "20260312-1200-juiceshop",
+  "created_at": "2026-03-12T12:00:00Z",
+  "status": "planned",
+  "target": "10.10.30.130",
+  "target_type": "web_application",
+  "application": "OWASP Juice Shop",
+  "mission_goal": "Exploit broken access control and authentication weaknesses through JWT algorithm confusion, IDOR, and privilege escalation chains — demonstrating post-authentication attack paths that do not rely on injection or XSS primitives",
+  "allowed_attack_types": [
+    "reconnaissance",
+    "vulnerability_scanning",
+    "cryptographic_attacks",
+    "privilege_escalation",
+    "exploitation"
+  ],
+  "max_exploits": 4,
+  "learning_objectives": [
+    "Understand RS256-to-HS256 JWT algorithm confusion: forge a valid admin token by signing with the server's exposed public key as an HMAC secret",
+    "Identify and exploit IDOR vulnerabilities in the REST API to access another user's basket and order history without authorization",
+    "Demonstrate broken function-level access control by accessing admin-only API routes (e.g., /rest/user/list, /api/Feedbacks) using a forged or legitimately obtained admin token",
+    "Enumerate sensitive internal endpoints via /support/logs and /encryptionkeys and extract operationally useful artifacts (JWT keys, access logs, premium unlock tokens)"
+  ],
+  "out_of_scope": [
+    "SQL Injection — Login Authentication Bypass (A03:2021) — exploited in mission 2026-03-12-001",
+    "SQL Injection — UNION Credential Dump (A03:2021) — exploited in mission 2026-03-12-001",
+    "Sensitive Data Exposure — Open FTP Directory + Null Byte Bypass (A02:2021 / A05:2021) — exploited in mission 2026-03-12-001",
+    "Persisted XSS — Product Review API (A03:2021) — exploited in mission 2026-03-12-001",
+    "Any reflected or stored XSS variants",
+    "SQL injection in any form",
+    "Brute force attacks against login endpoint",
+    "Any systems outside 10.10.30.130",
+    "Denial of service or application disruption",
+    "Data destruction or irreversible state changes"
+  ],
+  "success_criteria": "Mission complete when 4 findings are documented with reproduction steps and proof-of-concept evidence, OR all allowed attack types have been exhausted with documented findings at each stage. At minimum, JWT algorithm confusion (cryptographic_attacks) and at least one IDOR or broken access control exploit (privilege_escalation) must be demonstrated to satisfy the primary mission goal.",
+  "notes": "This is mission #2 against this target. Difficulty is intentionally escalated from mission 1 — the focus shifts from input-validation primitives to authentication and authorization logic flaws. Key attack surface to prioritize: (1) /encryptionkeys/ exposes the RS256 public key — use it as the HMAC secret in an HS256-signed JWT to forge admin tokens; (2) /rest/user/list is an admin-only endpoint accessible once privilege escalation succeeds; (3) IDOR candidates include /rest/basket/:id and /rest/orders/:id — access with numeric ID enumeration while authenticated as a low-privilege user; (4) /support/logs and audit.json for artifact extraction in the recon/vuln-scan phase. GraphQL at /graphql may expose schema introspection — include as a recon sub-objective if time permits. Lab environment only. Reset application state between runs if basket/order data is modified.",
+  "prior_missions_consulted": 1,
+  "previously_exploited_excluded": [
+    "SQL Injection — Login Authentication Bypass (A03:2021)",
+    "SQL Injection — UNION Credential Dump (A03:2021)",
+    "Sensitive Data Exposure — Open FTP Directory + Null Byte Bypass (A02:2021 / A05:2021)",
+    "Persisted XSS — Product Review API (A03:2021)"
+  ]
+}

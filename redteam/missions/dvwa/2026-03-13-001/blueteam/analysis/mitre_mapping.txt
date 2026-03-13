@@ -1,0 +1,56 @@
+=== MITRE ATT&CK MAPPING ===
+Mission: 2026-03-13-001
+Analyzed: "2026-03-13T15:45:01Z"
+
+TACTIC: Reconnaissance (TA0043)
+  Technique: T1595 — Active Scanning
+  Evidence: timeline.log and attack_indicators.txt. Observed host discovery and default creds check (admin/password) at 02:10:05Z.
+  Observed: YES
+
+TACTIC: Initial Access (TA0001)
+  Technique: T1190 — Exploit Public-Facing Application
+  Evidence: alert_summary.txt and attack_indicators.txt. SQLi on /vulnerabilities/sqli/, CMDi on /vulnerabilities/exec/, and XSS on /vulnerabilities/xss_r/.
+  Observed: YES
+
+TACTIC: Execution (TA0002)
+  Technique: T1059.004 — Command and Scripting Interpreter: Unix Shell
+  Evidence: attack_indicators.txt. CMDi used to run 'id' and 'cat /etc/passwd' as www-data.
+  Observed: YES
+
+TACTIC: Persistence (TA0003)
+  Observed: NO
+
+TACTIC: Privilege Escalation (TA0004)
+  Observed: NO
+
+TACTIC: Defense Evasion (TA0005)
+  Observed: NO
+
+TACTIC: Credential Access (TA0006)
+  Technique: T1552.001 — Unsecured Credentials: Credentials In Files
+  Evidence: config.inc.php.bak read via sensitive data exposure vulnerability.
+  Technique: T1603 — Steal Web Session Cookie
+  Evidence: Reflected XSS used to expose session cookies via /vulnerabilities/xss_r/.
+  Technique: T1555 — Credentials from Web Browsers
+  Evidence: Web admin (admin) and user (gordonb, 1337, etc.) hashes exfiltrated via SQLi UNION dump.
+  Observed: YES
+
+TACTIC: Discovery (TA0007)
+  Technique: T1083 — File and Directory Discovery
+  Evidence: nmap and directory enumeration identified /config/ directory and sensitive files.
+  Technique: T1046 — Network Service Discovery
+  Evidence: nmap scan identified Port 80 and Apache/PHP versions.
+  Observed: YES
+
+TACTIC: Lateral Movement (TA0008)
+  Observed: NO
+
+TACTIC: Collection (TA0009)
+  Technique: T1213 — Data from Information Repositories
+  Evidence: SQL Injection used to extract data from MariaDB backend database.
+  Observed: YES
+
+TACTIC: Exfiltration (TA0010)
+  Technique: T1041 — Exfiltration Over C2 Channel
+  Evidence: HTTP responses contained exfiltrated user hashes and configuration data.
+  Observed: YES

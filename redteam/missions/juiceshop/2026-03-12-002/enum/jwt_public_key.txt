@@ -1,0 +1,21 @@
+--- JWT RSA Public Key — /encryptionkeys/jwt.pub ---
+
+-----BEGIN RSA PUBLIC KEY-----
+MIGJAoGBAM3CosR73CBNcJsLv5E90NsFt6qN1uziQ484gbOoule8leXHFbyIzPQR
+ozgEpSpiwhr6d2/c0CfZHEJ3m5tV0klxfjfM7oqjRMURnH/rmBjcETQ7qzIISZQ/
+iptJ3p7Gi78X5ZMhLNtDkUFU9WaGdiEb+SnC39wjErmJSfmGb7i1AgMBAAE=
+-----END RSA PUBLIC KEY-----
+
+ATTACK VECTOR: JWT Algorithm Confusion (RS256 -> HS256)
+- Server signs tokens with RS256 using private key (never exposed)
+- Attacker retrieves the PUBLIC key from /encryptionkeys/jwt.pub
+- Attacker crafts a token with alg:HS256 and signs it using the PUBLIC KEY as the HMAC secret
+- Server (misconfigured) validates the HS256 token using the public key — accepts it
+- Attacker can forge any identity/role claim in the token
+
+PREREQUISITE: Obtain a valid token structure first (e.g., via registration or login)
+IMPACT: Full authentication bypass + privilege escalation to admin role
+OWASP: A02:2021 Cryptographic Failures
+
+PREMIUM KEY (/encryptionkeys/premium.key):
+1337133713371337.EA99A61D92D2955B1E9285B55BF2AD42

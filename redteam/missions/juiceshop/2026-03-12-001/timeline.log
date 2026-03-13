@@ -1,0 +1,20 @@
+2026-03-12T19:11:34Z [MASTER] MISSION STARTED | Target: 10.10.30.130 | Type: juiceshop | Mission ID: 2026-03-12-001
+2026-03-12T19:11:40Z [MASTER] PHASE STARTED: recon
+2026-03-12T19:14:22Z [MASTER] PHASE COMPLETED: recon | Findings: Host UP TTL=63 Linux; Port 3000 HTTP Node.js/Express; App: Juice Shop v19.2.0-SNAPSHOT; /ftp/ directory listing open with 11 files including incident-support.kdbx; /metrics unauthenticated; /rest/admin/application-configuration fully exposed; robots.txt discloses /ftp; acquisitions.md (CONFIDENTIAL) accessible; 75+ challenges mapped across 14 vuln categories; CORS wildcard enabled; key attack vectors: SQLi on login/search, XSS on feedback/search, broken access control on admin routes
+2026-03-12T19:14:30Z [MASTER] PHASE STARTED: scan
+2026-03-12T19:17:45Z [MASTER] PHASE COMPLETED: scan | Findings: Port 3000 HTTP Node.js confirmed; /support/logs directory open (access logs + audit.json); /encryptionkeys/ open — jwt.pub RSA key + premium.key (1337133713371337.EA99A61D92D2955B1E9285B55BF2AD42) exposed; 40+ paths discovered (most return 200 as SPA); CORS wildcard + full DELETE/PUT/PATCH methods allowed; /b2b/v2 requires JWT (401); access logs reveal server root at /juice-shop/; other browser user at 10.10.30.159
+2026-03-12T19:17:50Z [MASTER] PHASE STARTED: enum
+2026-03-12T19:42:30Z [MASTER] MISSION RESUMED | Last completed: scan | Resuming from: enum
+2026-03-12T19:42:30Z [MASTER] MISSION PLAN LOADED | allowed_attack_types: enumeration, vulnerability_scanning, injection, fuzzing, exploitation, brute_force | max_exploits: 4 | out_of_scope: DoS, persistent backdoors, data destruction, other systems, ransomware, social engineering | confirmed_exploit_count: 0
+2026-03-12T19:42:35Z [MASTER] PHASE STARTED: enum
+2026-03-12T19:50:00Z [MASTER] PHASE COMPLETED: enum | Findings: 111 challenges mapped across 16 categories; 21 user accounts enumerated (8 admins); Admin JWT obtained via SQLi; admin password cracked (admin123/MD5); FTP null byte bypass confirmed (.bak files accessible); XSS attack surface validated on feedback endpoint; JWT RSA public key confirmed at /encryptionkeys/jwt.pub; incident-support.kdbx identified as loot target
+2026-03-12T19:50:05Z [MASTER] PHASE STARTED: exploit
+2026-03-12T19:58:00Z [MASTER] PHASE COMPLETED: exploit | Findings: 4 exploits confirmed — SQLi login bypass (admin@juice-sh.op), FTP sensitive data + null byte bypass (kdbx + coupon codes), Persisted XSS via product review API (iframe javascript payload stored), SQLi UNION credential dump (22 accounts / 1 cracked: admin123)
+2026-03-12T19:58:00Z [MASTER] MISSION GOAL SATISFIED | confirmed_exploits: 4 / max_exploits: 4 | Proceeding to post-exploitation.
+2026-03-12T19:58:05Z [MASTER] PHASE STARTED: postex
+2026-03-12T20:05:00Z [MASTER] PHASE COMPLETED: postex | Findings: Admin API access confirmed; IDOR on all user baskets (IDs 1-5+); full app config dumped; metrics unauthenticated; app version 19.2.0-SNAPSHOT; localBackupEnabled:true; KeePass DB captured for offline cracking; 12 coupon codes exfiltrated; dependency list confirms sanitize-html 1.4.2 vulnerable
+2026-03-12T20:05:05Z [MASTER] PHASE STARTED: report
+2026-03-12T20:10:00Z [MASTER] PHASE COMPLETED: report | Artifacts: report/mission_report.md, report/walkthrough.md
+2026-03-12T20:12:00Z [MASTER] MISSION COMPLETE | Mission ID: 2026-03-12-001 | Report: report/mission_report.md
+2026-03-12T20:12:00Z [MASTER] INDEX UPDATED | missions/index.json | exploits recorded: 4
+2026-03-12T20:12:00Z [MASTER] MISSION GOAL SATISFIED | Reason: max_exploits reached | Mission ID: 2026-03-12-001

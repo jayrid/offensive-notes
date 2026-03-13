@@ -1,0 +1,39 @@
+--- Security Question Enumeration ---
+Source: /api/SecurityQuestions (unauthenticated)
+Leaked answers: /rest/admin/application-configuration (unauthenticated)
+
+SECURITY QUESTIONS (all 14):
+ID  Question
+1   Your eldest siblings middle name?
+2   Mother's maiden name?
+3   Mother's birth date? (MM/DD/YY)
+4   Father's birth date? (MM/DD/YY)
+5   Maternal grandmother's first name?
+6   Paternal grandmother's first name?
+7   Name of your favorite pet?
+8   Last name of dentist when you were a teenager?
+9   Your ZIP/postal code when you were a teenager?
+10  Company you first work for as an adult?
+11  Your favorite book?
+12  Your favorite movie?
+13  Number of one of your customer or ID cards?
+14  What's your favorite place to go hiking?
+
+LEAKED ANSWERS (from app-configuration endpoint):
+Q14 answer: "Daniel Boone National Forest"  (geoStalkingMetaSecurityQuestion)
+Q10 answer: "ITsec"                          (geoStalkingVisualSecurityQuestion)
+
+ASSOCIATED MEMORY ENTRIES (from app-config memories array):
+- "I love going hiking here..." — security_question=14, answer="Daniel Boone National Forest"
+- "My old workplace..." — security_question=10, answer="ITsec"
+
+ACCOUNT LINKED TO Q14 (hiking): unknown — requires correlation with /rest/user/security-question
+ACCOUNT LINKED TO Q10 (workplace): unknown — requires correlation with /rest/user/security-question
+
+ADMIN ACCOUNT SECURITY QUESTION:
+email: admin@juice-sh.op -> question ID 2 ("Mother's maiden name?")
+
+ATTACK PATH: Password reset bypass
+1. GET /rest/user/security-question?email=<email> to get question ID
+2. POST /rest/user/reset-password with known/guessed answer
+3. Set new password for account

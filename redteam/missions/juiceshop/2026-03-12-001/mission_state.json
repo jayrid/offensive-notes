@@ -1,0 +1,34 @@
+{
+  "mission_id": "2026-03-12-001",
+  "mission_dir": "missions/juiceshop/2026-03-12-001",
+  "target": "10.10.30.130",
+  "target_type": "juiceshop",
+  "target_port": 3000,
+  "target_url": "http://10.10.30.130:3000",
+  "current_phase": "complete",
+  "status": "complete",
+  "started_at": "2026-03-12T19:11:34Z",
+  "updated_at": "2026-03-12T20:12:00Z",
+  "completed_phases": ["recon", "scan", "enum", "exploit", "postex", "report"],
+  "failed_phase": null,
+  "plan_loaded": true,
+  "allowed_attack_types": [
+    "enumeration",
+    "vulnerability_scanning",
+    "injection",
+    "fuzzing",
+    "exploitation",
+    "brute_force"
+  ],
+  "out_of_scope": [
+    "Any systems outside 10.10.30.130",
+    "Port 3000 denial-of-service or resource exhaustion attacks",
+    "Persistent backdoors or reverse shells",
+    "Attacks against other lab users or IPs observed in access logs (e.g., 10.10.30.159)",
+    "Data destruction or database wipe operations",
+    "Ransomware simulation or file encryption payloads",
+    "Social engineering or phishing"
+  ],
+  "max_exploits": 4,
+  "confirmed_exploit_count": 4
+}

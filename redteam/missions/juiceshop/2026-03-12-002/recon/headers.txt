@@ -1,0 +1,17 @@
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Content-Type: text/html; charset=UTF-8
+Date: Fri, 13 Mar 2026 00:22:59 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+--- Notes ---
+- CORS wildcard (*) confirmed on all endpoints — amplifies XSS cross-origin impact
+- No WAF headers detected (no X-Cache, no X-Sucuri, no CF-Ray)
+- Node.js/Express stack (no Server header — common Express default)
+- X-Recruiting header leaks internal job board path /#/jobs
+- X-Frame-Options: SAMEORIGIN (clickjacking partially mitigated on main frame, not sub-resources)

@@ -1,0 +1,9 @@
+--- /encryptionkeys/ Directory Listing (HTTP 200, unauthenticated) ---
+
+Files:
+  jwt.pub    <-- RSA public key used for JWT RS256 signing
+  premium.key
+
+CRITICAL: jwt.pub enables JWT algorithm confusion attack (RS256 -> HS256).
+Attacker can re-sign any JWT payload using the RSA public key as the HMAC-SHA256 secret.
+This allows identity/role forging without knowing the private key.

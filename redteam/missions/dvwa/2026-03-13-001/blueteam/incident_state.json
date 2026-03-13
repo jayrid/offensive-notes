@@ -1,0 +1,92 @@
+{
+  "incident_id": "BT-2026-03-13-001",
+  "linked_mission": "2026-03-13-001",
+  "target": "10.10.30.129",
+  "target_type": "dvwa",
+  "mission_dir": "/home/jayrid/RedTeam/missions/dvwa/2026-03-13-001",
+  "blueteam_dir": "/home/jayrid/RedTeam/missions/dvwa/2026-03-13-001/blueteam",
+  "created_at": "2026-03-13T02:50:00Z",
+  "updated_at": "2026-03-13T02:55:00Z",
+  "overall_severity": "CRITICAL",
+  "pipeline_status": "complete",
+  "phases": {
+    "monitoring": "complete",
+    "analysis": "complete",
+    "collection": "complete",
+    "reporting": "complete"
+  },
+  "alert_source": "mission_artifacts",
+  "eve_json_available": false,
+  "findings_count": 4,
+  "alerts_generated": 9,
+  "alerts_critical": 3,
+  "alerts_high": 3,
+  "alerts_medium": 2,
+  "alerts_low": 1,
+  "mitre_tactics_observed": 7,
+  "persistence_established": false,
+  "lateral_movement": false,
+  "credentials_compromised": true,
+  "data_exfiltrated": true,
+  "findings": [
+    {
+      "id": "FIND-001",
+      "type": "SQL Injection",
+      "endpoint": "/vulnerabilities/sqli/",
+      "parameter": "id",
+      "severity": "CRITICAL",
+      "artifact": "exploit/exploit_01_sqli_credential_dump.md"
+    },
+    {
+      "id": "FIND-002",
+      "type": "OS Command Injection",
+      "endpoint": "/vulnerabilities/exec/",
+      "parameter": "ip",
+      "severity": "CRITICAL",
+      "artifact": "exploit/exploit_02_command_injection.md"
+    },
+    {
+      "id": "FIND-003",
+      "type": "Reflected XSS",
+      "endpoint": "/vulnerabilities/xss_r/",
+      "parameter": "name",
+      "severity": "HIGH",
+      "artifact": "exploit/exploit_03_reflected_xss.md"
+    },
+    {
+      "id": "FIND-004",
+      "type": "Sensitive Data Exposure",
+      "endpoint": "/config/config.inc.php.bak",
+      "parameter": "N/A",
+      "severity": "HIGH",
+      "artifact": "exploit/exploit_04_sensitive_data_exposure.md"
+    }
+  ],
+  "outputs": {
+    "alerts": [
+      "blueteam/alerts/alert_summary.txt",
+      "blueteam/alerts/high_severity.json"
+    ],
+    "evidence": [
+      "blueteam/evidence/artifact_manifest.txt",
+      "blueteam/evidence/network_iocs.txt",
+      "blueteam/evidence/attack_indicators.txt"
+    ],
+    "analysis": [
+      "blueteam/analysis/threat_assessment.md",
+      "blueteam/analysis/mitre_mapping.txt",
+      "blueteam/analysis/ioc_list.txt",
+      "blueteam/analysis/severity_rating.txt"
+    ],
+    "reports": [
+      "blueteam/reports/incident_report.md",
+      "blueteam/reports/defensive_recommendations.md"
+    ]
+  },
+  "delegations": [
+    {"phase": "monitoring", "agent": "blueteam-alert-monitor", "status": "complete"},
+    {"phase": "collection", "agent": "blueteam-evidence-collector", "status": "complete"},
+    {"phase": "analysis", "agent": "blueteam-threat-analyst", "status": "complete"},
+    {"phase": "reporting", "agent": "blueteam-report-writer", "status": "complete"}
+  ]
+}

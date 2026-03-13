@@ -1,0 +1,61 @@
+=== HOST-BASED ATTACK INDICATORS ===
+Attack Timeline:
+  recon: 2026-03-13T02:10:05Z - 02:12:00Z: Host discovery, default creds check (admin/password)
+  scan: 2026-03-13T02:12:01Z - 02:16:00Z: Port 80 scan, directory enumeration (/config/ found)
+  enum: 2026-03-13T02:16:01Z - 02:21:00Z: SQLi, CMDi, XSS vulnerability confirmation
+  exploit: 2026-03-13T02:21:01Z - 02:35:00Z: Exfiltration of user credentials, OS command execution, configuration disclosure
+  postex: 2026-03-13T02:35:01Z - 02:40:00Z: Impact assessment
+
+Tools Used by Attacker:
+  nmap: Port scanning and service discovery
+  curl: Web application interaction and exploitation
+  ping: Connectivity testing (leveraged via CMDi)
+  bash: Arbitrary command execution on the host
+  MariaDB: Backend database interaction via SQLi
+
+Commands of Interest:
+  999' UNION SELECT user,password FROM users-- - (phase: exploit)
+  ip=127.0.0.1|id (phase: exploit)
+  ip=127.0.0.1|cat /etc/passwd (phase: exploit)
+  <script>alert(document.cookie)</script> (phase: exploit)
+
+Files Accessed or Modified:
+  /etc/passwd (action: read)
+  /home/jayrid/RedTeam/missions/dvwa/2026-03-13-001/config/config.inc.php.bak (action: read)
+
+Credentials Harvested:
+  Database (app/vulnerables): DB user credentials found in config backup (source: config.inc.php.bak)
+  Web Admin (admin/5f4dcc3b5aa765d61d8327deb882cf99): Web application administrator (source: loot/credentials.md)
+  Web Users (gordonb, 1337, pablo, smithy): Web application users and MD5 hashes (source: loot/credentials.md)
+
+Privilege Escalation:
+  Access achieved: www-data
+  Method (if known): OS command injection via /vulnerabilities/exec/ module
+
+Persistence Mechanisms:
+  None found in postex artifacts
+
+=== ALERT-EVIDENCE CORRELATION ===
+Alert: ALERT-001 — SQL Injection Exploitation - User credentials exfiltrated (5 users)
+  Supporting evidence: /home/jayrid/RedTeam/missions/dvwa/2026-03-13-001/exploit/exploit_01_sqli_credential_dump.md (Contains UNION payload and 5 exfiltrated records)
+  Corroborated: YES
+
+Alert: ALERT-002 — OS Command Injection Exploitation - Arbitrary command execution as www-data and /etc/passwd read
+  Supporting evidence: /home/jayrid/RedTeam/missions/dvwa/2026-03-13-001/exploit/exploit_02_command_injection.md (Shows execution of 'id' and 'cat /etc/passwd')
+  Corroborated: YES
+
+Alert: ALERT-003 — Sensitive Data Disclosure - Database credentials exfiltrated from config.inc.php.bak
+  Supporting evidence: /home/jayrid/RedTeam/missions/dvwa/2026-03-13-001/exploit/exploit_04_sensitive_data_exposure.md (Displays DB credentials from configuration backup)
+  Corroborated: YES
+
+Alert: ALERT-004 — SQL Injection Enumeration - UNION-based SQLi confirmed on /vulnerabilities/sqli/
+  Supporting evidence: /home/jayrid/RedTeam/missions/dvwa/2026-03-13-001/notes/notes.md (Confirms column discovery during enumeration phase)
+  Corroborated: YES
+
+Alert: ALERT-005 — OS Command Injection Enumeration - Pipe separator confirmed on /vulnerabilities/exec/
+  Supporting evidence: /home/jayrid/RedTeam/missions/dvwa/2026-03-13-001/notes/notes.md (Confirms pipe character confirmation during enumeration phase)
+  Corroborated: YES
+
+Alert: ALERT-006 — Reflected Cross-Site Scripting (XSS) - Session cookie exposure confirmed
+  Supporting evidence: /home/jayrid/RedTeam/missions/dvwa/2026-03-13-001/exploit/exploit_03_reflected_xss.md (Shows reflected script tag and session cookie disclosure potential)
+  Corroborated: YES

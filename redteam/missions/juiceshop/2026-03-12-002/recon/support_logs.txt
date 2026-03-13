@@ -1,0 +1,11 @@
+--- /support/logs Directory Listing (HTTP 200, unauthenticated) ---
+
+Files:
+  logs/access.log.2026-03-11
+  logs/access.log.2026-03-12
+  logs/access.log.2026-03-13
+  logs/audit.json
+
+HIGH VALUE: audit.json leaks application operational events including internal IPs,
+user activity patterns, and internal route access data.
+Access logs expose request patterns, user agents, internal IPs.

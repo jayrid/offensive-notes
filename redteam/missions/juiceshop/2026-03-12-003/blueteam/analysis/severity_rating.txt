@@ -1,0 +1,16 @@
+=== INCIDENT SEVERITY RATING ===
+Overall Severity: CRITICAL
+
+Justification:
+- Access level achieved: admin (Unauthorized administrative login and harvested credentials)
+- Kill chain stages completed: 7 of 14 (Recon, Initial Access, Execution, Credential Access, Discovery, Collection, Exfiltration)
+- Data exfiltrated: YES (6 user baskets including admin data)
+- Persistence established: NO
+- Lateral movement: NO
+- Credentials compromised: YES (admin@juice-sh.op:admin123)
+
+Severity Scale:
+  CRITICAL — root/admin access + credentials stolen or persistence established
+  HIGH — successful exploitation + user-level access
+  MEDIUM — failed exploitation or only recon/scan completed
+  LOW — passive recon only, no exploitation

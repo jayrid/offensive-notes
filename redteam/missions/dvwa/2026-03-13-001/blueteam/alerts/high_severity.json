@@ -1,0 +1,62 @@
+[
+  {
+    "alert_id": "ALERT-001",
+    "severity": "CRITICAL",
+    "phase": "exploitation",
+    "timestamp": "2026-03-13T02:21:01Z",
+    "signature": "SQL Injection Exploitation - User credentials exfiltrated (5 users)",
+    "attacker_ip": "lab-attacker",
+    "target": "10.10.30.129",
+    "evidence_source": "/home/jayrid/RedTeam/missions/dvwa/2026-03-13-001/exploit/exploit_01_sqli_credential_dump.md"
+  },
+  {
+    "alert_id": "ALERT-002",
+    "severity": "CRITICAL",
+    "phase": "exploitation",
+    "timestamp": "2026-03-13T02:21:01Z",
+    "signature": "OS Command Injection Exploitation - Arbitrary command execution as www-data and /etc/passwd read",
+    "attacker_ip": "lab-attacker",
+    "target": "10.10.30.129",
+    "evidence_source": "/home/jayrid/RedTeam/missions/dvwa/2026-03-13-001/exploit/exploit_02_command_injection.md"
+  },
+  {
+    "alert_id": "ALERT-003",
+    "severity": "CRITICAL",
+    "phase": "exploitation",
+    "timestamp": "2026-03-13T02:21:01Z",
+    "signature": "Sensitive Data Disclosure - Database credentials exfiltrated from config.inc.php.bak",
+    "attacker_ip": "lab-attacker",
+    "target": "10.10.30.129",
+    "evidence_source": "/home/jayrid/RedTeam/missions/dvwa/2026-03-13-001/exploit/exploit_04_sensitive_data_exposure.md"
+  },
+  {
+    "alert_id": "ALERT-004",
+    "severity": "HIGH",
+    "phase": "enumeration",
+    "timestamp": "2026-03-13T02:16:01Z",
+    "signature": "SQL Injection Enumeration - UNION-based SQLi confirmed on /vulnerabilities/sqli/",
+    "attacker_ip": "lab-attacker",
+    "target": "10.10.30.129",
+    "evidence_source": "/home/jayrid/RedTeam/missions/dvwa/2026-03-13-001/exploit/exploit_01_sqli_credential_dump.md"
+  },
+  {
+    "alert_id": "ALERT-005",
+    "severity": "HIGH",
+    "phase": "enumeration",
+    "timestamp": "2026-03-13T02:16:01Z",
+    "signature": "OS Command Injection Enumeration - Pipe separator confirmed on /vulnerabilities/exec/",
+    "attacker_ip": "lab-attacker",
+    "target": "10.10.30.129",
+    "evidence_source": "/home/jayrid/RedTeam/missions/dvwa/2026-03-13-001/exploit/exploit_02_command_injection.md"
+  },
+  {
+    "alert_id": "ALERT-006",
+    "severity": "HIGH",
+    "phase": "exploitation",
+    "timestamp": "2026-03-13T02:21:01Z",
+    "signature": "Reflected Cross-Site Scripting (XSS) - Session cookie exposure confirmed",
+    "attacker_ip": "lab-attacker",
+    "target": "10.10.30.129",
+    "evidence_source": "/home/jayrid/RedTeam/missions/dvwa/2026-03-13-001/exploit/exploit_03_reflected_xss.md"
+  }
+]

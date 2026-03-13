@@ -1,0 +1,164 @@
+{
+  "mission_id": "20260312-0900-juiceshop-10103010",
+  "created_at": "2026-03-12T09:00:00Z",
+  "status": "planned",
+  "target": "http://10.10.30.130",
+  "target_type": "web_application",
+  "target_subtype": "juiceshop",
+  "mission_goal": "Identify and demonstrate a broad set of OWASP Top 10 vulnerabilities in the Juice Shop instance, with emphasis on injection flaws, broken authentication, and sensitive data exposure — establishing a comprehensive baseline of exploitable surface area for this target.",
+  "allowed_attack_types": [
+    "reconnaissance",
+    "enumeration",
+    "vulnerability_scanning",
+    "injection",
+    "fuzzing",
+    "exploitation",
+    "brute_force"
+  ],
+  "max_exploits": 5,
+  "attack_surface_context": {
+    "known_high_value_paths": [
+      "/ftp/ — open directory with sensitive files (KeePass .kdbx, package.json.bak)",
+      "/encryptionkeys/ — exposes JWT RS256 public key (algorithm confusion attack surface) and premium unlock keys",
+      "/support/logs — live access logs and audit.json leaking internal IP and route data",
+      "/b2b/v2 — JWT-authenticated API endpoint, target for token forgery",
+      "/graphql — GraphQL endpoint, warrants introspection query during enumeration",
+      "/rest and /api — primary REST attack surface for SQLi and IDOR"
+    ],
+    "known_behaviors": [
+      "CORS wildcard (*) on all HTTP methods — amplifies XSS impact significantly",
+      "JWT signing uses RS256 with a discoverable public key — HS256 algorithm confusion viable"
+    ]
+  },
+  "phase_breakdown": {
+    "phase_1_reconnaissance": {
+      "label": "Passive Recon",
+      "objective": "Fingerprint the target and map publicly exposed endpoints without triggering rate limiting or WAF rules",
+      "techniques": [
+        "HTTP banner grabbing (Server, X-Powered-By, X-Frame-Options headers)",
+        "robots.txt and sitemap.xml retrieval",
+        "Crawl application to discover JS source bundles — Juice Shop embeds all routes in main.js",
+        "Technology fingerprinting via Wappalyzer-equivalent header analysis (Node.js/Express stack)"
+      ],
+      "exit_criteria": "Target tech stack confirmed, base URL inventory complete, JS route map extracted"
+    },
+    "phase_2_scanning": {
+      "label": "Vulnerability Scanning",
+      "objective": "Automated surface scan to identify low-hanging fruit and prioritize manual exploitation queue",
+      "techniques": [
+        "Nikto or equivalent lightweight HTTP scanner against http://10.10.30.130",
+        "Directory brute-force (gobuster/ffuf) against known Juice Shop paths: /ftp/, /encryptionkeys/, /support/logs, /b2b/, /assets/",
+        "HTTP method enumeration (OPTIONS) on REST endpoints",
+        "GraphQL endpoint detection and initial introspection query at /graphql"
+      ],
+      "exit_criteria": "Open directories confirmed, exposed file inventory documented, GraphQL schema retrieved"
+    },
+    "phase_3_enumeration": {
+      "label": "Deep Enumeration",
+      "objective": "Extract actionable data from confirmed exposed surfaces before active exploitation",
+      "techniques": [
+        "Retrieve /ftp/ directory contents — target .kdbx file and package.json.bak for version intel",
+        "Download /encryptionkeys/ artifacts — extract JWT public key, note RS256 algorithm in use",
+        "Parse /support/logs audit.json for internal route and user activity data",
+        "REST API enumeration: probe /rest/user/whoami, /api/Users/, /api/Products/ for IDOR surface",
+        "GraphQL introspection: dump full schema, identify mutations (e.g., createUser, updateUser)"
+      ],
+      "exit_criteria": "JWT public key retrieved, user API IDOR surface confirmed, GraphQL schema fully documented"
+    },
+    "phase_4_exploitation": {
+      "label": "Active Exploitation",
+      "objective": "Demonstrate and document up to max_exploits (5) distinct vulnerabilities with reproduction steps",
+      "exploit_candidates": [
+        {
+          "id": "EXP-01",
+          "vulnerability": "SQL Injection — Login Bypass",
+          "endpoint": "POST /rest/user/login",
+          "technique": "Classic OR-based SQLi in email field: ' OR 1=1-- to authenticate as first user (admin)",
+          "success_indicator": "200 response with authentication token and admin email in response body",
+          "owasp_category": "A03:2021 Injection"
+        },
+        {
+          "id": "EXP-02",
+          "vulnerability": "JWT Algorithm Confusion (RS256 -> HS256)",
+          "endpoint": "GET /rest/user/whoami with forged Authorization header",
+          "technique": "Retrieve RS256 public key from /encryptionkeys/; re-sign a manipulated token using the public key as the HMAC-SHA256 secret with alg:HS256; escalate role to admin",
+          "success_indicator": "Server accepts forged token, /rest/user/whoami returns admin identity",
+          "owasp_category": "A02:2021 Cryptographic Failures"
+        },
+        {
+          "id": "EXP-03",
+          "vulnerability": "Sensitive Data Exposure via Open Directory",
+          "endpoint": "GET /ftp/",
+          "technique": "Direct browse to open /ftp/ directory; retrieve acquisition.md, eastere.gg, and .kdbx file without authentication",
+          "success_indicator": "Files downloaded; sensitive content (internal docs, credential store) confirmed accessible",
+          "owasp_category": "A02:2021 Cryptographic Failures / A01:2021 Broken Access Control"
+        },
+        {
+          "id": "EXP-04",
+          "vulnerability": "IDOR — Access Any User's Data via REST API",
+          "endpoint": "GET /api/Users/:id",
+          "technique": "Enumerate /api/Users/1 through /api/Users/20 without admin token; observe which user records are returned to unauthenticated or low-privilege requests",
+          "success_indicator": "User PII (email, password hash) returned for IDs other than the authenticated caller's own record",
+          "owasp_category": "A01:2021 Broken Access Control"
+        },
+        {
+          "id": "EXP-05",
+          "vulnerability": "Reflected XSS — Search Endpoint",
+          "endpoint": "GET /search?q=<payload>",
+          "technique": "Inject <iframe src=\"javascript:alert('xss')\"> or <script>alert(1)</script> variants into the q parameter; CORS wildcard amplifies exploitability",
+          "success_indicator": "Payload renders unescaped in the HTTP response body or executes in browser context",
+          "owasp_category": "A03:2021 Injection (XSS)"
+        }
+      ],
+      "exit_criteria": "All 5 exploit candidates attempted; findings documented with request/response evidence for each confirmed exploit"
+    },
+    "phase_5_post_exploitation": {
+      "label": "Post-Exploitation",
+      "objective": "Demonstrate impact of successful exploits — no destructive actions, no persistent changes to lab state",
+      "techniques": [
+        "Using admin JWT from EXP-01 or EXP-02: access /rest/admin/application-configuration to retrieve internal app config",
+        "Enumerate all registered users via /api/Users/ with admin token — document credential hash exposure",
+        "Retrieve /support/logs/audit.json with admin credentials — document what operational data is exposed",
+        "Demonstrate privilege boundary: confirm non-admin endpoints accessible with forged token from EXP-02"
+      ],
+      "constraints": [
+        "Do NOT modify, delete, or corrupt any user records",
+        "Do NOT change admin credentials or application configuration values",
+        "Do NOT submit orders or execute financial transactions",
+        "Do NOT trigger DoS conditions via fuzzing rate"
+      ],
+      "exit_criteria": "Impact scope documented; admin-only data confirmed accessible; no lab state modified"
+    },
+    "phase_6_reporting": {
+      "label": "Findings Documentation",
+      "objective": "Produce a structured findings report consumable by redteam-master and the trainee",
+      "required_outputs": [
+        "findings.json — machine-readable list of confirmed exploits with OWASP category, severity, reproduction steps, and request/response evidence",
+        "executive_summary.md — 1-page plain-language impact narrative",
+        "remediation_notes.md — per-finding fix recommendations keyed to exploit IDs (EXP-01 through EXP-05)"
+      ],
+      "exit_criteria": "All three output files written to missions/10.10.30.130/; mission_plan.json status updated to 'completed'"
+    }
+  },
+  "learning_objectives": [
+    "Identify and exploit SQL injection in an authentication endpoint and understand why parameterized queries prevent it",
+    "Understand JWT algorithm confusion attacks — specifically how a discoverable RS256 public key enables HS256 token forgery",
+    "Recognize and exploit open directory listings as a sensitive data exposure vector",
+    "Demonstrate IDOR via REST API enumeration and articulate the difference between authentication and authorization failures",
+    "Execute and document reflected XSS, and explain how CORS wildcard policy amplifies client-side injection impact"
+  ],
+  "out_of_scope": [
+    "Any host other than 10.10.30.130",
+    "Denial of Service or application crash induction",
+    "Persistent backdoor or webshell installation",
+    "Ransomware simulation or file destruction",
+    "Credential brute-force against external or upstream services",
+    "Social engineering or phishing",
+    "Lateral movement to other network hosts",
+    "Modifying or deleting application data in any persistent way"
+  ],
+  "success_criteria": "Mission complete when: (a) all 5 exploit candidates in phase_4 have been attempted AND (b) at least 4 of 5 are confirmed with documented request/response evidence AND (c) findings.json, executive_summary.md, and remediation_notes.md are written to missions/10.10.30.130/. Early termination is acceptable if all allowed_attack_types are exhausted before 5 exploits are confirmed.",
+  "notes": "Lab environment only. Target is OWASP Juice Shop — an intentionally vulnerable Node.js/Express application. All exploits are against synthetic data. The JWT key retrieval from /encryptionkeys/ is a prerequisite for EXP-02 and should be completed during phase_3 before exploitation begins. The CORS wildcard on this target means any XSS finding should be documented with its cross-origin amplification impact noted. Juice Shop resets to clean state on container restart — no persistent lab damage concern.",
+  "prior_missions_consulted": 0,
+  "previously_exploited_excluded": []
+}

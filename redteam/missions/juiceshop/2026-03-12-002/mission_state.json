@@ -1,0 +1,36 @@
+{
+  "mission_id": "2026-03-12-002",
+  "mission_dir": "missions/juiceshop/2026-03-12-002",
+  "target": "10.10.30.130",
+  "target_type": "juiceshop",
+  "target_port": 3000,
+  "target_url": "http://10.10.30.130:3000",
+  "current_phase": "complete",
+  "status": "completed",
+  "started_at": "2026-03-12T19:22:00Z",
+  "updated_at": "2026-03-13T00:36:27Z",
+  "completed_phases": ["recon", "scan", "enum", "exploit", "postex", "report"],
+  "failed_phase": null,
+  "plan_loaded": true,
+  "allowed_attack_types": [
+    "reconnaissance",
+    "enumeration",
+    "vulnerability_scanning",
+    "injection",
+    "fuzzing",
+    "exploitation",
+    "brute_force"
+  ],
+  "out_of_scope": [
+    "Any host other than 10.10.30.130",
+    "Denial of Service or application crash induction",
+    "Persistent backdoor or webshell installation",
+    "Ransomware simulation or file destruction",
+    "Credential brute-force against external or upstream services",
+    "Social engineering or phishing",
+    "Lateral movement to other network hosts",
+    "Modifying or deleting application data in any persistent way"
+  ],
+  "max_exploits": 5,
+  "confirmed_exploit_count": 5
+}

@@ -1,0 +1,36 @@
+{
+  "mission_id": "2026-03-13-001",
+  "created_at": "2026-03-13T02:05:08Z",
+  "status": "planned",
+  "target": "10.10.30.129",
+  "target_type": "web_application",
+  "mission_goal": "Identify and demonstrate foundational web application vulnerabilities in DVWA including SQL injection, command injection, and reflected XSS, validating exploitability under low and medium security levels",
+  "allowed_attack_types": [
+    "reconnaissance",
+    "enumeration",
+    "injection",
+    "exploitation",
+    "fuzzing"
+  ],
+  "max_exploits": 4,
+  "learning_objectives": [
+    "Understand and exploit classic SQL injection via DVWA's login and user lookup forms to achieve authentication bypass and data extraction",
+    "Identify and exploit OS command injection in DVWA's ping utility endpoint to achieve arbitrary command execution on the server",
+    "Demonstrate reflected XSS by injecting and triggering a malicious script payload through a user-controlled input parameter",
+    "Recognize how DVWA security levels (low vs medium) affect input validation and understand the bypass implications for each"
+  ],
+  "out_of_scope": [
+    "Any systems or IP addresses other than 10.10.30.129",
+    "Brute force attacks against user credentials",
+    "Privilege escalation beyond the web application layer",
+    "Lateral movement to other hosts",
+    "Persistent backdoor installation",
+    "File upload exploitation",
+    "CSRF attacks",
+    "Denial of service or resource exhaustion"
+  ],
+  "success_criteria": "Mission complete when 4 distinct exploit findings are documented with reproduction steps and proof-of-concept evidence, or all allowed attack types have been exhausted against viable DVWA modules",
+  "notes": "Target is DVWA (Damn Vulnerable Web Application) running at http://10.10.30.129. Default credentials are admin/password. Set DVWA Security Level to 'Low' for initial exploitation, then optionally repeat against 'Medium' to demonstrate bypass techniques. This is a first mission against this target — no prior exploit history to exclude. All exercises are contained within the lab host at 10.10.30.129.",
+  "prior_missions_consulted": 0,
+  "previously_exploited_excluded": []
+}

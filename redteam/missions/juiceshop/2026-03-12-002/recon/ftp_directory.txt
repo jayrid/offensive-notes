@@ -1,0 +1,20 @@
+--- /ftp/ Directory Listing (HTTP 200, unauthenticated) ---
+
+Files present:
+  acquisitions.md
+  announcement_encrypted.md
+  coupons_2013.md.bak
+  eastere.gg
+  encrypt.pyc
+  incident-support.kdbx      <-- KeePass credential database
+  legal.md
+  package-lock.json.bak
+  package.json.bak
+  suspicious_errors.yml
+  quarantine/                <-- Subdirectory
+
+High-value targets for download:
+  1. incident-support.kdbx — KeePass credential database, directly downloadable
+  2. package.json.bak — dependency manifest, leaks exact library versions
+  3. acquisitions.md — internal business document (sensitive data exposure)
+  4. coupons_2013.md.bak — potential coupon codes / discount logic
