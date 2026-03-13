@@ -1,0 +1,26 @@
+site_name: HTB Lab Notes
+site_description: Detailed walkthroughs and research for HackTheBox machines.
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: green
+    accent: green
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - search.suggest
+    - search.highlight
+
+nav:
+  - Home: index.md
+  - Machines:
+      - Pterodactyl: Pterodactyl/walkthrough.md
+      - Unknown: Unknown/walkthrough.md
+      - WingData: WingData/walkthrough.md
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - toc:
+      permalink: true

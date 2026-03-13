@@ -1,0 +1,4 @@
+# Nmap 7.95 scan initiated Tue Mar 10 21:10:00 2026 as: /usr/lib/nmap/nmap --privileged -sC -sV -p 80,21,2121,5466,8080,8443,443 -oA /home/jayrid/HTB/WingData/scans/nmap_wingftp 10.129.4.107
+Host: 10.129.4.107 ()	Status: Up
+Host: 10.129.4.107 ()	Ports: 21/filtered/tcp//ftp///, 80/open/tcp//http//Apache httpd 2.4.66/, 443/filtered/tcp//https///, 2121/filtered/tcp//ccproxy-ftp///, 5466/filtered/tcp/////, 8080/filtered/tcp//http-proxy///, 8443/filtered/tcp//https-alt///
+# Nmap done at Tue Mar 10 21:10:13 2026 -- 1 IP address (1 host up) scanned in 13.67 seconds

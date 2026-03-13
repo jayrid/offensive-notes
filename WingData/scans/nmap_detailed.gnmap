@@ -1,0 +1,4 @@
+# Nmap 7.95 scan initiated Tue Mar 10 21:08:32 2026 as: /usr/lib/nmap/nmap --privileged -sC -sV -p 22,80 -oA /home/jayrid/HTB/WingData/scans/nmap_detailed 10.129.4.107
+Host: 10.129.4.107 ()	Status: Up
+Host: 10.129.4.107 ()	Ports: 22/open/tcp//ssh//OpenSSH 9.2p1 Debian 2+deb12u7 (protocol 2.0)/, 80/open/tcp//http//Apache httpd 2.4.66/
+# Nmap done at Tue Mar 10 21:08:45 2026 -- 1 IP address (1 host up) scanned in 12.98 seconds

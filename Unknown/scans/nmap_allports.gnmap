@@ -1,0 +1,4 @@
+# Nmap 7.95 scan initiated Tue Mar 10 17:20:57 2026 as: /usr/lib/nmap/nmap --privileged -p- --min-rate 10000 -oA /home/jayrid/HTB/Unknown/scans/nmap_allports 10.129.4.99
+Host: 10.129.4.99 ()	Status: Up
+Host: 10.129.4.99 ()	Ports: 22/open/tcp//ssh///, 80/open/tcp//http///, 443/closed/tcp//https///, 8080/closed/tcp//http-proxy///	Ignored State: filtered (65531)
+# Nmap done at Tue Mar 10 17:21:11 2026 -- 1 IP address (1 host up) scanned in 13.65 seconds

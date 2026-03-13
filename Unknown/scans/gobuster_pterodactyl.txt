@@ -1,0 +1,5 @@
+/.hta                 (Status: 403) [Size: 153]
+/.htaccess            (Status: 403) [Size: 153]
+/.htpasswd            (Status: 403) [Size: 153]
+/index.php            (Status: 200) [Size: 1686]
+/phpinfo.php          (Status: 200) [Size: 73004]

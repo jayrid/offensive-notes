@@ -1,0 +1,137 @@
+
+<html>
+<head>
+<title>Wing FTP Server - Web Client</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="pragma" content="no-cache" />
+<meta http-equiv="cache-control" content="no-cache, must-revalidate" />
+<meta http-equiv="Expires" content="0" />
+<link rel="Shortcut Icon" href="images/logo.ico" type="image/x-icon">
+<link rel="stylesheet" href="css/bulma.min.css" type="text/css">
+<link rel="stylesheet" href="css/allfonts.min.css" type="text/css">
+<style type="text/css">
+	img { 
+		float:left; margin-right:10px; margin-top:-22px;
+	} 
+	input:focus,select:focus {
+		border:0px;
+	}
+	.main {
+		width:480px; margin:0 auto; margin-top:100px;
+	}
+
+	.hiddenimg {
+		margin:5px;
+		display:none;
+	}
+
+	@media only screen and (max-width: 1023px), only screen and (max-device-width: 1023px) {
+		.main {
+			width:380px; margin:0 auto; margin-top:60px;
+		}
+	}
+</style>
+
+<!--[if lt IE 9]>
+  <style type="text/css">
+	.input:active,.input:focus,.select select:active,.select select:focus {
+		border:solid 1px #CCC;
+	}
+
+	.hiddenimg {
+		margin:5px;
+		display:block;
+	}
+  </style>
+<![endif]-->
+
+
+<script language="javascript">
+
+if(!navigator.cookieEnabled)
+{
+	alert("Cookies must be enabled on your browser!");
+}
+
+function $(obj)
+{
+	return document.getElementById(obj);
+}
+
+function ch()
+{
+	if ($("username_val").value=="")
+	{
+		alert("Please enter your account name!");
+		$("username_val").focus();
+		return false;
+	}
+	$("username").value = $("username_val").value.replace(/\+/g,"\t");
+	$("password").value = $("password_val").value.replace(/\+/g,"\t");
+	return true;
+}
+
+
+function setCookie(name,value,date) 
+{
+	document.cookie = name + "=" + escape(value) + "; expires=" + date.toGMTString() + "; path=/;";
+}
+
+function getCookie(name) 
+{
+	var search; 
+	search = name + "=" 
+	offset = document.cookie.indexOf(search) 
+	if (offset != -1) 
+	{ 
+		offset += search.length ; 
+		end = document.cookie.indexOf(";", offset) ; 
+		if (end == -1) 
+		end = document.cookie.length; 
+		return unescape(document.cookie.substring(offset, end)); 
+	} 
+	else 
+	{
+		return ""; 
+	}
+}
+
+function deleteCookie(name) 
+{
+	var expdate = new Date(); 
+	expdate.setTime(expdate.getTime() - (86400*1000)); 
+	setCookie(name, "", expdate); 
+}
+
+var langindexArr = new Array("english","french","german","italian","dutch","portuguese","spanish","schinese","tchinese","japanese","czech","romanian","turkish","korean","polish");
+var langArr = new Array("English","French","German","Italian","Dutch","Portuguese","Spanish","Simplified Chinese","Traditional Chinese","Japanese","Czech","Romanian","Turkish","Korean","Polish");
+
+if(navigator.cookieEnabled)
+{
+	if(getCookie("client_lang") == "" && location.search.indexOf("?lang") == -1)
+	{
+		var language = null;
+		if (navigator.appName == 'Netscape')
+			language = navigator.language;
+		else
+			language = navigator.browserLanguage;
+
+		if (language.indexOf('en') > -1) location = '?lang=english';
+		else if (language.indexOf('fr') > -1) location = '?lang=french';
+		else if (language.indexOf('de') > -1) location = '?lang=german';
+		else if (language.indexOf('it') > -1) location = '?lang=italian';
+		else if (language.indexOf('nl') > -1) location = '?lang=dutch';
+		else if (language.indexOf('pt') > -1) location = '?lang=portuguese';
+		else if (language.indexOf('es') > -1) location = '?lang=spanish';
+		else if (language.indexOf('zh-TW') > -1) location = '?lang=tchinese';
+		else if (language.indexOf('zh-HK') > -1) location = '?lang=tchinese';
+		else if (language.indexOf('zh-MO') > -1) location = '?lang=tchinese';
+		else if (language.indexOf('zh') > -1) location = '?lang=schinese';
+		else if (language.indexOf('ja') > -1) location = '?lang=japanese';
+		else if (language.indexOf('cz') > -1) location = '?lang=czech';
+		else if (language.indexOf('ro') > -1) location = '?lang=romanian';
+		else if (language.indexOf('tr') > -1) location = '?lang=turkish';
+		else if (language.indexOf('ko') > -1) location = '?lang=korean';
+		else if (

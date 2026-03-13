@@ -1,0 +1,25 @@
+# HTB Walkthroughs Ignore File
+
+# Protect VPN and connection files
+*.ovpn
+*.conf
+**/vpn/
+
+# Protect Loot and Credentials
+**/loot/
+**/*.hash
+**/*.ntlm
+**/*.kdbx
+
+# Python/System artifacts
+__pycache__/
+*.py[cod]
+.env
+.venv/
+env/
+venv/
+.DS_Store
+
+# Scans can sometimes be huge or contain session data
+**/scans/*.xml
+**/scans/*.nmap

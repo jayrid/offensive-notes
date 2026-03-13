@@ -1,0 +1,7 @@
+/.htpasswd            (Status: 403) [Size: 317]
+/.htaccess            (Status: 403) [Size: 317]
+/.hta                 (Status: 403) [Size: 317]
+/assets               (Status: 301) [Size: 353] [--> http://wingdata.htb/assets/]
+/index.html           (Status: 200) [Size: 12492]
+/server-status        (Status: 403) [Size: 317]
+/vendor               (Status: 301) [Size: 353] [--> http://wingdata.htb/vendor/]
