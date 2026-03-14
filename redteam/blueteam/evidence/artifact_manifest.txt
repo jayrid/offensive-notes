@@ -1,0 +1,57 @@
+ARTIFACT MANIFEST — BLUE-2026-03-13-001
+Target: 10.10.30.128 (bWAPP)
+Collected: 2026-03-13T12:06:00Z
+Evidence Mode: Artifact Reconstruction from Red Team Mission Files
+
+=== MISSION ARTIFACT INVENTORY ===
+
+SOURCE ARTIFACTS (Red Team — read-only reference):
+
+  [ART-001] /home/jayrid/RedTeam/missions/bwapp/2026-03-13-001/mission_state.json
+    Type: Mission metadata
+    Relevance: Confirms mission ID, target, attack types allowed, exploit count (4/4)
+
+  [ART-002] /home/jayrid/RedTeam/missions/bwapp/2026-03-13-001/mission_plan.json
+    Type: Attack plan
+    Relevance: Entry point (portal.php), primary vectors (SQLi, CMDi, XSS), security level medium
+
+  [ART-003] /home/jayrid/RedTeam/missions/bwapp/2026-03-13-001/timeline.log
+    Type: Chronological attack log
+    Relevance: Precise timestamps for each phase, exploit confirmation events
+
+  [ART-004] /home/jayrid/RedTeam/missions/bwapp/2026-03-13-001/recon/recon_findings.md
+    Type: Reconnaissance findings
+    Relevance: Open ports (80, 3306), directory listings, sensitive files, session cookie weaknesses
+    Key Evidence: /passwords/wp-config.bak → DB creds; /db/bwapp.sqlite → admin SHA1 hash
+
+  [ART-005] /home/jayrid/RedTeam/missions/bwapp/2026-03-13-001/scan/scan_findings.md
+    Type: Vulnerability scan output
+    Relevance: phpinfo.php exposed, PHP 5.5.9 EOL, system()/exec() not disabled, open_basedir unrestricted
+
+  [ART-006] /home/jayrid/RedTeam/missions/bwapp/2026-03-13-001/exploit/exploit_findings.md
+    Type: Exploit proof-of-concept documentation
+    Relevance: 4 confirmed exploits with payloads, responses, and impact descriptions
+
+  [ART-007] /home/jayrid/RedTeam/missions/bwapp/2026-03-13-001/loot/credentials.md
+    Type: Exfiltrated credentials
+    Relevance: Application users (A.I.M./bug, bee/bug), DB creds (thor/Asgard, root/empty), 6 hero creds
+
+  [ART-008] /home/jayrid/RedTeam/missions/bwapp/2026-03-13-001/postex/postex_findings.md
+    Type: Post-exploitation findings
+    Relevance: Container identity (770425fcb17d), www-data shell, MySQL root no-password, /etc/passwd
+
+BLUE TEAM ARTIFACTS (written during this incident):
+
+  [BLUE-001] blueteam/alerts/alert_summary.txt — 9 reconstructed alerts with severity ratings
+  [BLUE-002] blueteam/alerts/high_severity.json — Structured JSON for 6 high/critical alerts
+  [BLUE-003] blueteam/evidence/artifact_manifest.txt — This file
+  [BLUE-004] blueteam/evidence/attack_indicators.txt — IOCs and attack signatures
+  [BLUE-005] blueteam/evidence/network_iocs.txt — Network-layer IOCs
+
+=== EVIDENCE CHAIN OF CUSTODY ===
+
+All source artifacts are Red Team mission outputs from mission 2026-03-13-001.
+Mission completed at 2026-03-13T11:45:02Z.
+Blue Team incident initiated at 2026-03-13T12:00:00Z.
+No modifications made to source artifacts.
+All blue team outputs are written exclusively to blueteam/ subdirectory.

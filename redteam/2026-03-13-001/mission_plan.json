@@ -1,0 +1,46 @@
+{
+  "mission_id": "2026-03-13-001",
+  "target": "10.10.30.128",
+  "target_slug": "bwapp",
+  "target_type": "web_application",
+  "application": "bWAPP",
+  "planned_at": "2026-03-13T00:00:00Z",
+  "status": "planned",
+  "challenge_id": "initial_recon_sqli_auth",
+  "security_level": "medium",
+  "entry_point": "http://10.10.30.128/bWAPP/portal.php",
+  "credentials": {
+    "username": "bee",
+    "password": "bug"
+  },
+  "allowed_attack_types": [
+    "injection",
+    "enumeration",
+    "exploitation",
+    "fuzzing",
+    "broken_auth"
+  ],
+  "out_of_scope": [
+    "ssrf",
+    "xxe",
+    "file_inclusion",
+    "csrf"
+  ],
+  "primary_vectors": [
+    "SQL Injection (Authentication Bypass) — login portal parameter",
+    "OS Command Injection — server-side shell metacharacter injection",
+    "Stored XSS — persistent payload injection into user-supplied field",
+    "Parameter Fuzzing — discovery of hidden parameters and endpoints"
+  ],
+  "learning_objectives": [
+    "Perform initial service discovery and application fingerprinting of bWAPP at medium security level",
+    "Demonstrate authentication bypass via SQL injection on the login portal (tautological or comment-based payload)",
+    "Identify and exploit an OS command injection sink to achieve server-side code execution",
+    "Enumerate and fuzz application parameters to surface unprotected or poorly filtered inputs",
+    "Contrast medium-level filter bypasses with prior DVWA/Juice Shop low-security exploitation techniques"
+  ],
+  "max_exploits": 4,
+  "success_criteria": "Successful authentication bypass plus demonstrated exploitation of at least 2 additional distinct vulnerability classes (command injection, stored XSS, or parameter fuzzing). All exploits must function at security level: medium.",
+  "time_limit_minutes": 60,
+  "notes": "First mission against bWAPP. Establish baseline of which security level medium filters are bypassable vs. requiring encoding/evasion. Document filter bypass techniques encountered for use in subsequent missions at higher security levels."
+}

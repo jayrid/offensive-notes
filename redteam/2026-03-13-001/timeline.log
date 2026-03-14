@@ -1,0 +1,21 @@
+2026-03-13T10:00:00Z [MASTER] MISSION STARTED | Target: 10.10.30.128 | Type: bwapp | Mission ID: 2026-03-13-001
+2026-03-13T10:00:05Z [MASTER] MISSION PLAN LOADED | allowed_attack_types: injection, enumeration, exploitation, fuzzing, broken_auth | max_exploits: 4 | out_of_scope: ssrf, xxe, file_inclusion, csrf
+2026-03-13T10:00:10Z [MASTER] PHASE STARTED: recon
+2026-03-13T10:15:00Z [MASTER] PHASE COMPLETED: recon | Findings: Apache 2.4.7/Ubuntu + PHP 5.5.9 + MySQL 5.5.47 | Open directories: /passwords/ /db/ /admin/ | SQLite DB downloaded | Plaintext creds in heroes.xml | DB creds in wp-config.bak | PHPSESSID no HttpOnly | MySQL port 3306 exposed | Admin portal accessible unauthenticated
+2026-03-13T10:15:05Z [MASTER] PHASE STARTED: scan
+2026-03-13T10:30:00Z [MASTER] PHASE COMPLETED: scan | Findings: PHP 5.5.9 EOL exposed via phpinfo.php | system()/exec() NOT disabled | open_basedir unrestricted | 8 directory listings enabled | MySQL 3306 exposed | Admin portal no auth | SOAP library source exposed | Session cookies no HttpOnly/Secure
+2026-03-13T10:30:05Z [MASTER] PHASE STARTED: enum
+2026-03-13T10:45:00Z [MASTER] PHASE COMPLETED: enum | Findings: 158 vulnerabilities catalogued | Primary targets: sqli_1.php (5-col GET injection), commandi.php (OS cmd injection, escapeshellcmd only), xss_stored_1.php (stored XSS blog), login.php (auth bypass) | Medium security: addslashes()+escapeshellcmd()+htmlspecialchars() — all bypassable | MySQL movies table 5 columns confirmed
+2026-03-13T10:45:05Z [MASTER] PHASE STARTED: exploit
+2026-03-13T11:00:00Z [MASTER] EXPLOIT CONFIRMED #1: Broken Authentication — Admin Login via Credential Leakage | A.I.M./bug from wp-config.bak + bwapp.sqlite | Type: broken_auth
+2026-03-13T11:05:00Z [MASTER] EXPLOIT CONFIRMED #2: SQL Injection — Authentication Bypass on sqli_16.php | Payload: bee' AND '1'='1' OR '1'='1 | Logged in as A.I.M. admin | Type: injection
+2026-03-13T11:10:00Z [MASTER] EXPLOIT CONFIRMED #3: OS Command Injection on commandi.php | Payload: www.nsa.gov; id | RCE confirmed: uid=33(www-data) | Type: injection
+2026-03-13T11:15:00Z [MASTER] EXPLOIT CONFIRMED #4: Stored XSS on xss_stored_1.php | Payload: <script>alert(document.cookie)</script> | Persisted and rendered unescaped | Type: injection
+2026-03-13T11:15:01Z [MASTER] MISSION GOAL SATISFIED | confirmed_exploits: 4 / max_exploits: 4 | Proceeding to post-exploitation.
+2026-03-13T11:15:10Z [MASTER] PHASE STARTED: postex
+2026-03-13T11:30:00Z [MASTER] PHASE COMPLETED: postex | Findings: Ubuntu 14.04 container (770425fcb17d) | www-data shell | /app/admin/settings.php: MySQL root empty password | Full DB dump via RCE | /etc/passwd read | Network: only 80+3306 exposed | Docker container confirmed
+2026-03-13T11:30:05Z [MASTER] PHASE STARTED: report
+2026-03-13T11:45:00Z [MASTER] PHASE COMPLETED: report | Generated: report/mission_report.md, report/walkthrough.md
+2026-03-13T11:45:01Z [MASTER] MISSION GOAL SATISFIED | Reason: max_exploits reached | Mission ID: 2026-03-13-001
+2026-03-13T11:45:02Z [MASTER] MISSION COMPLETE | Mission ID: 2026-03-13-001 | Report: report/mission_report.md
+2026-03-13T11:45:10Z [MASTER] INDEX UPDATED | missions/index.json | exploits recorded: 4 | status: completed

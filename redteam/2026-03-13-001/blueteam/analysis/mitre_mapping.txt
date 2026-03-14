@@ -1,0 +1,136 @@
+MITRE ATT&CK MAPPING — BLUE-2026-03-13-001
+Target: 10.10.30.128 (bWAPP)
+Framework: MITRE ATT&CK for Enterprise + ICS (Web Application Focus)
+Generated: 2026-03-13T12:11:00Z
+
+=== TACTIC: RECONNAISSANCE (TA0043) ===
+
+T1595.002 — Active Scanning: Vulnerability Scanning
+  Evidence: Systematic HTTP enumeration of all directories exposed in robots.txt
+  Observed: GET /passwords/, /db/, /admin/, /documents/, /apps/, /soap/, /images/, /js/
+
+T1592.002 — Gather Victim Host Information: Software
+  Evidence: phpinfo.php accessed — full PHP config disclosed (version, functions, paths)
+  Observed: GET /phpinfo.php → PHP 5.5.9, disable_functions, open_basedir
+
+T1598.003 — Phishing for Information: Spearphishing Link (analog: passive disclosure)
+  Evidence: robots.txt enumerated to discover sensitive paths proactively disallowed
+  Observed: robots.txt discloses /passwords/, /admin/, /documents/, /images/
+
+=== TACTIC: RESOURCE DEVELOPMENT (TA0042) ===
+
+T1588.001 — Obtain Capabilities: Malware (analog: use of available shell tools)
+  Evidence: mysql client binary and system shell invoked via RCE
+  Observed: mysql -u root executed as www-data post-exploitation
+
+=== TACTIC: INITIAL ACCESS (TA0001) ===
+
+T1190 — Exploit Public-Facing Application
+  Evidence: SQL injection on /sqli_16.php bypassed authentication
+  Payload: bee' AND '1'='1' OR '1'='1
+  Severity: CRITICAL
+
+T1078.001 — Valid Accounts: Default Accounts
+  Evidence: Admin login using default/leaked credential A.I.M./bug from bwapp.sqlite
+  Severity: HIGH
+
+T1552.001 — Unsecured Credentials: Credentials in Files
+  Evidence: wp-config.bak and heroes.xml in web-accessible /passwords/ directory
+  Data: thor/Asgard (DB), 6 hero plaintext credentials
+
+=== TACTIC: EXECUTION (TA0002) ===
+
+T1059 — Command and Scripting Interpreter
+  Evidence: OS command injection via /commandi.php — server executed id, whoami, cat
+  Payload: www.nsa.gov; id → uid=33(www-data)
+  Severity: CRITICAL
+
+T1059.007 — Command and Scripting Interpreter: JavaScript
+  Evidence: Stored XSS payload <script>alert(document.cookie)</script> stored and executed
+  Endpoint: /xss_stored_1.php → blog table → rendered to all visitors
+  Severity: HIGH
+
+=== TACTIC: PERSISTENCE (TA0003) ===
+
+T1505.003 — Server Software Component: Web Shell (functional equivalent)
+  Evidence: Stored XSS provides persistent JavaScript execution for all visitors
+  Impact: Every user visiting the blog page executes attacker-controlled JavaScript
+
+=== TACTIC: CREDENTIAL ACCESS (TA0006) ===
+
+T1555 — Credentials from Password Stores
+  Evidence: bwapp.sqlite downloaded — users table with SHA1 hashed passwords
+  Hash: 6885858486f31043e5839c735d99457f045affd0 = "bug" (crackable)
+
+T1552.001 — Credentials in Files
+  Evidence: wp-config.bak (thor/Asgard), heroes.xml (6 plaintext), settings.php (MySQL root/empty)
+  Total credentials compromised: 10 distinct accounts
+
+T1212 — Exploitation for Credential Access
+  Evidence: SQL injection on /sqli_16.php yielded admin session without password knowledge
+
+=== TACTIC: DISCOVERY (TA0007) ===
+
+T1083 — File and Directory Discovery
+  Evidence: Directory listings enabled — attacker browsed /passwords/, /db/, /admin/ etc.
+
+T1082 — System Information Discovery
+  Evidence: Post-ex via RCE: hostname (container ID), uname -a (kernel version), /etc/passwd read
+  System identified as Docker container 770425fcb17d, Ubuntu 14.04.3, kernel 6.8.0-100
+
+T1016 — System Network Configuration Discovery
+  Evidence: Network listeners enumerated via RCE — 0.0.0.0:3306, 0.0.0.0:80, 127.0.0.11:46549
+
+=== TACTIC: COLLECTION (TA0009) ===
+
+T1005 — Data from Local System
+  Evidence: /etc/passwd read; /app/admin/settings.php read (MySQL root no-password); full DB dump
+  Via: OS command injection on /commandi.php
+
+T1213 — Data from Information Repositories
+  Evidence: Full MySQL database dump via RCE: SELECT login,password,email,admin FROM bWAPP.users
+  Data: All user records including admin credentials
+
+=== TACTIC: EXFILTRATION (TA0010) ===
+
+T1041 — Exfiltration Over C2 Channel (analog: exfiltration via HTTP response)
+  Evidence: All data extracted via HTTP response bodies from /commandi.php RCE output
+  No external C2 channel used — data returned in HTTP responses
+
+=== TACTIC: IMPACT (TA0040) ===
+
+T1565.003 — Data Manipulation: Runtime Data Manipulation
+  Evidence: Blog entry injected with stored XSS — persistent JavaScript modifies DOM for all users
+  Impact: Any visitor's browser executes attacker script; session cookie exfiltration enabled
+
+=== KILL CHAIN MAPPING (LOCKHEED MARTIN) ===
+
+Phase 1 — Reconnaissance:
+  robots.txt enumeration, directory listing exploitation, phpinfo.php disclosure
+
+Phase 2 — Weaponization:
+  SQL injection payload crafted (tautological AND/OR bypass of addslashes())
+  Shell injection payload crafted (semicolon bypass of escapeshellcmd())
+  XSS payload crafted (<script>alert(document.cookie)</script>)
+
+Phase 3 — Delivery:
+  All payloads delivered via HTTP POST to web application endpoints
+
+Phase 4 — Exploitation:
+  SQLi bypassed authentication on /sqli_16.php
+  CMDi achieved RCE on /commandi.php
+  XSS persisted in MySQL blog table
+
+Phase 5 — Installation:
+  Stored XSS = persistent payload in database (executes on every page load)
+  No traditional backdoor installed (Docker container, limited scope)
+
+Phase 6 — Command and Control:
+  All C2 via HTTP responses — no outbound reverse shell established
+
+Phase 7 — Actions on Objectives:
+  Admin access achieved (broken auth + SQLi)
+  Full DB dump (users, credentials)
+  /etc/passwd read
+  MySQL root credential confirmed (empty password)
+  Session hijack vector established (stored XSS + no HttpOnly on PHPSESSID)

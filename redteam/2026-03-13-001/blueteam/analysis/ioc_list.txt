@@ -1,0 +1,104 @@
+IOC LIST — BLUE-2026-03-13-001
+Target: 10.10.30.128 (bWAPP)
+Generated: 2026-03-13T12:12:00Z
+
+=== NETWORK IOCs ===
+
+[IOC-N01] IP Address — Target
+  Value: 10.10.30.128
+  Type: IPv4 — web application host
+  Ports: TCP/80 (HTTP), TCP/3306 (MySQL — exposed)
+
+[IOC-N02] URI — SQL Injection Endpoint
+  Value: http://10.10.30.128/sqli_16.php
+  Type: HTTP URI
+  Attack: POST parameter "login" vulnerable to boolean tautology SQLi
+
+[IOC-N03] URI — OS Command Injection Endpoint
+  Value: http://10.10.30.128/commandi.php
+  Type: HTTP URI
+  Attack: POST parameter "target" vulnerable to semicolon shell injection
+
+[IOC-N04] URI — Stored XSS Endpoint
+  Value: http://10.10.30.128/xss_stored_1.php
+  Type: HTTP URI
+  Attack: POST parameter "entry" stored without sanitization
+
+[IOC-N05] URI — Sensitive Credential Files
+  Value: http://10.10.30.128/passwords/wp-config.bak
+  Value: http://10.10.30.128/passwords/heroes.xml
+  Value: http://10.10.30.128/db/bwapp.sqlite
+  Type: HTTP URIs — unauthenticated file access
+
+[IOC-N06] URI — Admin Portal (No Auth)
+  Value: http://10.10.30.128/admin/index.php
+  Type: HTTP URI — unauthenticated admin access
+
+=== FILE IOCs ===
+
+[IOC-F01] /passwords/wp-config.bak
+  Risk: Contains MySQL username/password (thor/Asgard) in web-accessible location
+
+[IOC-F02] /passwords/heroes.xml
+  Risk: Contains 6 plaintext username/password pairs in web-accessible location
+
+[IOC-F03] /db/bwapp.sqlite
+  Risk: Full SQLite database with user credentials downloadable without authentication
+
+[IOC-F04] /phpinfo.php
+  Risk: Full PHP environment configuration including server paths and enabled functions
+
+[IOC-F05] /app/admin/settings.php (read via RCE)
+  Risk: MySQL root credentials (empty password) hardcoded in application config
+
+=== PAYLOAD IOCs (ATTACK SIGNATURES) ===
+
+[IOC-P01] SQL Injection Payload
+  Raw: bee' AND '1'='1' OR '1'='1
+  Context: HTTP POST body, login parameter
+  Signature: single-quote, AND/OR keywords, tautological equality conditions
+
+[IOC-P02] OS Command Injection Payload
+  Raw: www.nsa.gov; id
+  Additional: www.nsa.gov; cat /etc/passwd | www.nsa.gov; mysql -u root...
+  Context: HTTP POST body, target parameter
+  Signature: semicolon followed by shell command keyword
+
+[IOC-P03] Stored XSS Payload
+  Raw: <script>alert(document.cookie)</script>
+  Context: HTTP POST body, entry parameter
+  Signature: HTML script opening tag in user-submitted content
+
+=== CREDENTIAL IOCs (COMPROMISED) ===
+
+[IOC-C01] Application Credentials
+  A.I.M. / bug (admin) — SHA1: 6885858486f31043e5839c735d99457f045affd0
+  bee / bug (user/admin) — SHA1: 6885858486f31043e5839c735d99457f045affd0
+
+[IOC-C02] Database Credentials
+  thor / Asgard — MySQL user (from wp-config.bak)
+  root / (empty) — MySQL root (from RCE reading settings.php)
+
+[IOC-C03] Hero/Character Credentials (plaintext from heroes.xml)
+  neo / trinity
+  alice / loveZombies
+  thor / Asgard
+  wolverine / Log@N
+  johnny / m3ph1st0ph3l3s
+  seline / m00n
+
+=== HASH IOCs ===
+
+[IOC-H01] SHA1 Hash — Password "bug"
+  Hash: 6885858486f31043e5839c735d99457f045affd0
+  Algorithm: SHA1 (unsalted) — trivially crackable
+  Used by: A.I.M. and bee accounts
+
+=== CONTAINER/HOST IOCs ===
+
+[IOC-SYS01] Docker Container ID
+  Value: 770425fcb17d
+  OS: Ubuntu 14.04.3 LTS (EOL)
+  Kernel: 6.8.0-100-generic x86_64 (host kernel)
+  Process User: www-data (uid=33, gid=33)
+  Web Root: /app/

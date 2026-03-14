@@ -1,0 +1,105 @@
+ATTACK INDICATORS — BLUE-2026-03-13-001
+Target: 10.10.30.128 (bWAPP)
+Generated: 2026-03-13T12:06:30Z
+
+=== HOST-BASED INDICATORS ===
+
+[HIB-001] SENSITIVE FILES IN WEB ROOT
+  Files: /passwords/wp-config.bak, /passwords/heroes.xml, /db/bwapp.sqlite
+  Risk: Credential exposure via unauthenticated HTTP download
+  Detection: File integrity monitoring on /passwords/ and /db/ web directories
+
+[HIB-002] UNAUTHENTICATED ADMIN PORTAL
+  Path: /admin/index.php (HTTP 200, no auth challenge)
+  Risk: Full admin access without credentials
+  Detection: Alert on HTTP 200 response to /admin/ from unauthenticated sessions
+
+[HIB-003] PHP INFORMATION DISCLOSURE
+  Path: /phpinfo.php (HTTP 200, full PHP env exposed)
+  Risk: Server path disclosure, config enumeration for attacker reconnaissance
+  Detection: HTTP access logging to phpinfo.php from non-localhost IPs
+
+[HIB-004] MYSQL ROOT WITH EMPTY PASSWORD
+  Location: Discovered via RCE reading /app/admin/settings.php
+  Risk: Full database compromise from any localhost process (e.g., via RCE)
+  Detection: MySQL audit logging; authentication failure/success tracking
+
+[HIB-005] SESSION COOKIE WITHOUT HttpOnly FLAG
+  Cookie: PHPSESSID (no HttpOnly, no Secure)
+  Risk: Session cookie readable by injected JavaScript — XSS to session hijack pivot
+  Detection: HTTP header inspection; PHPSESSID exfiltration in POST bodies or redirect params
+
+=== WEB APPLICATION ATTACK INDICATORS ===
+
+[WAI-001] SQL INJECTION — BOOLEAN TAUTOLOGY PATTERN
+  Endpoint: POST /sqli_16.php
+  Payload Pattern: login=<user>' AND '<value>'='<value>' OR '<value>'='<value>
+  Specific Payload: bee' AND '1'='1' OR '1'='1
+  Detection Signatures:
+    - Single-quote in POST body login/username parameters
+    - SQL keywords (AND, OR, SELECT, UNION) in form fields
+    - Tautological conditions: '1'='1', 'a'='a'
+  WAF Rule: Block or alert on single-quote in login/password POST params
+
+[WAI-002] OS COMMAND INJECTION — SHELL SEPARATOR
+  Endpoint: POST /commandi.php
+  Payload Pattern: <legit_domain>; <shell_command>
+  Specific Payload: www.nsa.gov; id
+  Shell Operators Used: ; (semicolon)
+  Detection Signatures:
+    - Semicolon (;) in DNS/URL form field parameters
+    - Shell command keywords in web form inputs: id, whoami, cat, uname, ls, mysql
+    - Server responses containing "uid=" or "gid=" strings
+  WAF Rule: Block semicolons and pipe characters in DNS/IP form fields
+
+[WAI-003] STORED XSS — SCRIPT TAG INJECTION
+  Endpoint: POST /xss_stored_1.php
+  Payload: <script>alert(document.cookie)</script>
+  Stored: MySQL blog table → rendered unescaped on page load
+  Detection Signatures:
+    - <script> tags in POST body form parameters
+    - HTML event handlers (onerror, onload, onclick) in form inputs
+    - alert(), document.cookie, document.location references in stored content
+  WAF Rule: Filter/escape HTML tags in user-submitted blog/comment fields
+
+[WAI-004] CREDENTIAL STUFFING FROM LEAKED CONFIGS
+  Endpoint: POST /login.php
+  Source: Credentials from /db/bwapp.sqlite (A.I.M./bug) + /passwords/wp-config.bak (thor/Asgard)
+  Detection Signatures:
+    - Successful admin authentication immediately following download of bwapp.sqlite
+    - Login attempts with credentials matching config file contents
+  Detection: Correlate file access logs with subsequent authentication events
+
+=== BEHAVIORAL INDICATORS ===
+
+[BEH-001] SEQUENTIAL DIRECTORY ENUMERATION
+  Pattern: Rapid GET requests to multiple /passwords/, /db/, /admin/, /soap/, /documents/ in seconds
+  Detection: Alert on >5 distinct directory requests within 60 seconds from same source IP
+
+[BEH-002] BACKUP FILE ACCESS
+  Pattern: GET requests to *.bak, *.sqlite, *.xml files from non-internal IPs
+  Specific: GET /passwords/wp-config.bak (HTTP 200), GET /db/bwapp.sqlite (HTTP 200)
+  Detection: Alert on 200 response to *.bak or *.sqlite file extensions from web directories
+
+[BEH-003] COMMAND OUTPUT IN HTTP RESPONSE
+  Pattern: HTTP response body contains "uid=", "gid=", "/bin/bash", "/etc/passwd" content
+  Context: POST to /commandi.php returned raw shell command output
+  Detection: Outbound HTTP response body inspection for shell command output patterns
+
+[BEH-004] POST-EXPLOITATION DATABASE QUERIES VIA RCE
+  Pattern: MySQL client invoked via shell injection through web app
+  Commands: mysql -u root --password='' -e 'SELECT login,password...'
+  Detection: Process monitoring on web server — alert on mysql client spawned by www-data
+
+=== CREDENTIALS CONFIRMED COMPROMISED ===
+
+Application:
+  - A.I.M. / bug (admin)
+  - bee / bug (admin — flag 1 via RCE)
+
+Database:
+  - root / (empty) — MySQL root, full DB access
+  - thor / Asgard — from wp-config.bak
+
+Hero Characters (plaintext from heroes.xml):
+  - neo/trinity, alice/loveZombies, thor/Asgard, wolverine/Log@N, johnny/m3ph1st0ph3l3s, seline/m00n

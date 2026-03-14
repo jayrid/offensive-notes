@@ -1,0 +1,111 @@
+SEVERITY RATING — BLUE-2026-03-13-001
+Target: 10.10.30.128 (bWAPP)
+Generated: 2026-03-13T12:12:30Z
+
+=== OVERALL INCIDENT SEVERITY: CRITICAL ===
+
+Rationale: Remote code execution confirmed; full database compromise; admin credential exfiltration;
+persistent stored XSS enabling session hijacking for all users. Multiple vulnerability classes
+chained to achieve complete application and server-level compromise.
+
+=== INDIVIDUAL VULNERABILITY SEVERITY RATINGS ===
+
+[VULN-001] OS Command Injection — Remote Code Execution
+  Endpoint: POST /commandi.php
+  CVSS v3.1 Base Score: 9.8 (CRITICAL)
+  Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H
+  Impact: Full server command execution as www-data; file system read; DB dump
+  Exploitability: Trivial — single semicolon bypass of escapeshellcmd()
+  CWE: CWE-78 — Improper Neutralization of Special Elements used in OS Commands
+
+[VULN-002] SQL Injection — Authentication Bypass
+  Endpoint: POST /sqli_16.php
+  CVSS v3.1 Base Score: 9.8 (CRITICAL)
+  Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H
+  Impact: Authentication bypass without credentials; admin access; data exfiltration
+  Exploitability: Trivial — addslashes() bypass via AND/OR tautology
+  CWE: CWE-89 — Improper Neutralization of Special Elements in SQL Command
+
+[VULN-003] Sensitive File Exposure — Credentials in Web Root
+  Paths: /passwords/wp-config.bak, /passwords/heroes.xml, /db/bwapp.sqlite
+  CVSS v3.1 Base Score: 9.1 (CRITICAL)
+  Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N
+  Impact: All application and database credentials exfiltrated without authentication
+  Exploitability: None required — direct HTTP GET
+  CWE: CWE-200 — Exposure of Sensitive Information; CWE-312 — Cleartext Storage
+
+[VULN-004] MySQL Root — Empty Password + Network Exposure
+  Service: MySQL 5.5.47 on TCP/3306 (0.0.0.0 binding)
+  CVSS v3.1 Base Score: 9.1 (CRITICAL)
+  Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N
+  Impact: Full database access from any network host; no authentication required
+  Exploitability: Trivial — connect to port 3306, no password
+  CWE: CWE-521 — Weak Password Requirements; CWE-284 — Improper Access Control
+
+[VULN-005] Broken Authentication — Admin Credential Leakage
+  Source: /db/bwapp.sqlite + /passwords/wp-config.bak
+  CVSS v3.1 Base Score: 8.8 (HIGH)
+  Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H
+  Impact: Full admin login achieved via leaked credentials from open directories
+  Exploitability: None — credentials in plaintext/crackable form in web root
+  CWE: CWE-522 — Insufficiently Protected Credentials
+
+[VULN-006] Stored Cross-Site Scripting — Session Hijacking Vector
+  Endpoint: POST /xss_stored_1.php
+  CVSS v3.1 Base Score: 8.2 (HIGH)
+  Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:L/A:N
+  Impact: Persistent JS execution on all visitors; PHPSESSID (no HttpOnly) exfiltration
+  Exploitability: Low — script tag in blog field; medium security bypass via session param
+  CWE: CWE-79 — Improper Neutralization of Input During Web Page Generation (XSS)
+
+[VULN-007] Unauthenticated Admin Portal
+  Endpoint: GET /admin/index.php
+  CVSS v3.1 Base Score: 7.5 (HIGH)
+  Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N
+  Impact: Full admin functionality accessible without credentials
+  Exploitability: None — direct access
+  CWE: CWE-306 — Missing Authentication for Critical Function
+
+[VULN-008] Directory Listing Enabled — Multiple Paths
+  Paths: /passwords/, /db/, /admin/, /documents/, /apps/, /soap/, /images/, /js/
+  CVSS v3.1 Base Score: 5.3 (MEDIUM)
+  Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N
+  Impact: Full directory tree disclosure; enables targeted file downloads
+  CWE: CWE-548 — Exposure of Information Through Directory Listing
+
+[VULN-009] PHP Information Disclosure (phpinfo.php Exposed)
+  Endpoint: GET /phpinfo.php
+  CVSS v3.1 Base Score: 5.3 (MEDIUM)
+  Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N
+  Impact: Server config, paths, environment variables disclosed to unauthenticated users
+  CWE: CWE-200 — Exposure of Sensitive Information
+
+[VULN-010] Session Cookie — Missing HttpOnly and Secure Flags
+  Cookie: PHPSESSID
+  CVSS v3.1 Base Score: 5.4 (MEDIUM)
+  Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N
+  Impact: Session cookies readable by JavaScript; compound risk with stored XSS
+  CWE: CWE-1004 — Sensitive Cookie Without HttpOnly Flag; CWE-614 — Sensitive Cookie in HTTPS without Secure Attribute
+
+=== RISK SUMMARY TABLE ===
+
+Rank | Vuln                              | CVSS  | Severity
+-----|-----------------------------------|-------|----------
+1    | OS Command Injection (RCE)        | 9.8   | CRITICAL
+2    | SQL Injection Auth Bypass         | 9.8   | CRITICAL
+3    | Sensitive Files in Web Root       | 9.1   | CRITICAL
+4    | MySQL Root / Empty PW / Exposed   | 9.1   | CRITICAL
+5    | Broken Auth / Credential Leakage  | 8.8   | HIGH
+6    | Stored XSS / Session Hijack       | 8.2   | HIGH
+7    | Unauthenticated Admin Portal      | 7.5   | HIGH
+8    | Directory Listing (8 paths)       | 5.3   | MEDIUM
+9    | phpinfo.php Exposed               | 5.3   | MEDIUM
+10   | Session Cookie Flags Missing      | 5.4   | MEDIUM
+
+=== COMPOSITE INCIDENT RISK ===
+
+Incident Risk Level: CRITICAL
+  - 4 CRITICAL severity vulnerabilities, each independently sufficient for full compromise
+  - Attack chain achieves complete confidentiality, integrity, and partial availability impact
+  - No compensating controls detected (no WAF, no IPS, no auth on admin, no input validation)
+  - Vulnerable OS (Ubuntu 14.04 EOL) — unpatched kernel exploits likely available for container escape

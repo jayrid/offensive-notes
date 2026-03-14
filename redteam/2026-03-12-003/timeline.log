@@ -1,0 +1,18 @@
+2026-03-12T00:00:00Z [MASTER] MISSION STARTED | Target: 10.10.30.130 | Type: juiceshop | Mission ID: 2026-03-12-003
+2026-03-12T00:00:00Z [MASTER] MISSION PLAN LOADED | allowed_attack_types: idor, enumeration | max_exploits: 3 | out_of_scope: none
+2026-03-12T00:01:00Z [MASTER] PHASE STARTED: recon
+2026-03-12T00:05:00Z [MASTER] PHASE COMPLETED: recon | Findings: Juice Shop v19.2.0-SNAPSHOT on :3000, admin auth confirmed, 22 users enumerated via /api/Users, basket API structure mapped, IDOR vector confirmed on /rest/basket/:id — no ownership validation
+2026-03-12T00:06:00Z [MASTER] PHASE STARTED: scan
+2026-03-12T00:08:00Z [MASTER] PHASE COMPLETED: scan | Findings: Single open port 3000/tcp (HTTP). No SSH/FTP/SMB. All methods allowed (GET/POST/PUT/PATCH/DELETE). No CSP or HSTS headers. CORS wildcard. Attack surface is exclusively web layer.
+2026-03-12T00:09:00Z [MASTER] PHASE STARTED: enum
+2026-03-12T00:12:00Z [MASTER] PHASE COMPLETED: enum | Findings: IDOR confirmed on /rest/basket/:id — customer JWT (User 24) accessed baskets 1-6 belonging to other users (HTTP 200). Basket-to-user mapping established. /api/BasketItems also leaks all items cross-user. Root cause: no ownership validation, only JWT presence checked.
+2026-03-12T00:13:00Z [MASTER] PHASE STARTED: exploit
+2026-03-12T00:18:00Z [MASTER] PHASE COMPLETED: exploit | Findings: 3 IDOR exploits confirmed — (1) GET /rest/basket/1 admin basket read (2) PUT /api/BasketItems/4 write to Jim basket (3) GET /rest/basket/3 cross-customer read. All HTTP 200. No ownership validation at any layer.
+2026-03-12T00:18:00Z [MASTER] MISSION GOAL SATISFIED | confirmed_exploits: 3 / max_exploits: 3 | Proceeding to post-exploitation.
+2026-03-12T00:19:00Z [MASTER] PHASE STARTED: postex
+2026-03-12T00:21:00Z [MASTER] PHASE COMPLETED: postex | Impact: 6 baskets dumped, cart data for 6 users exposed including admin. Cart write demonstrated (Jim qty 2->5). Order tracking endpoint also leaks cross-user order IDs. Zero-privilege-escalation attack chain documented.
+2026-03-12T00:22:00Z [MASTER] PHASE STARTED: report
+2026-03-12T00:25:00Z [MASTER] PHASE COMPLETED: report | report/mission_report.md and report/walkthrough.md written
+2026-03-12T00:25:00Z [MASTER] MISSION COMPLETE | Mission ID: 2026-03-12-003 | Report: report/mission_report.md
+2026-03-12T00:25:00Z [MASTER] INDEX UPDATED | missions/index.json | exploits recorded: 3
+2026-03-12T00:25:00Z [MASTER] MISSION GOAL SATISFIED | Reason: max_exploits reached | Mission ID: 2026-03-12-003

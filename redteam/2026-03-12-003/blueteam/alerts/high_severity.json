@@ -1,0 +1,74 @@
+[
+  {
+    "timestamp": "2026-03-12T00:01:00Z",
+    "severity": "HIGH",
+    "phase": "recon",
+    "signature": "Unauthorized administrative login",
+    "attacker_ip": "lab-attacker",
+    "target": "10.10.30.130",
+    "evidence_source": "timeline.log"
+  },
+  {
+    "timestamp": "2026-03-12T00:01:00Z",
+    "severity": "HIGH",
+    "phase": "recon",
+    "signature": "Massive user enumeration via /api/Users",
+    "attacker_ip": "lab-attacker",
+    "target": "10.10.30.130",
+    "evidence_source": "mission_report.md"
+  },
+  {
+    "timestamp": "2026-03-12T00:09:00Z",
+    "severity": "HIGH",
+    "phase": "enumeration",
+    "signature": "Sequential ID enumeration on /rest/basket/:id",
+    "attacker_ip": "lab-attacker",
+    "target": "10.10.30.130",
+    "evidence_source": "notes.md"
+  },
+  {
+    "timestamp": "2026-03-12T00:13:00Z",
+    "severity": "CRITICAL",
+    "phase": "exploitation",
+    "signature": "IDOR exploit: Unauthorized read of admin basket",
+    "attacker_ip": "lab-attacker",
+    "target": "10.10.30.130",
+    "evidence_source": "mission_report.md"
+  },
+  {
+    "timestamp": "2026-03-12T00:13:00Z",
+    "severity": "CRITICAL",
+    "phase": "exploitation",
+    "signature": "IDOR exploit: Unauthorized modification of Jim's basket item",
+    "attacker_ip": "lab-attacker",
+    "target": "10.10.30.130",
+    "evidence_source": "mission_report.md"
+  },
+  {
+    "timestamp": "2026-03-12T00:13:00Z",
+    "severity": "CRITICAL",
+    "phase": "exploitation",
+    "signature": "IDOR exploit: Unauthorized read of customer basket (Bender)",
+    "attacker_ip": "lab-attacker",
+    "target": "10.10.30.130",
+    "evidence_source": "mission_report.md"
+  },
+  {
+    "timestamp": "2026-03-12T00:19:00Z",
+    "severity": "CRITICAL",
+    "phase": "exfiltration",
+    "signature": "Mass exfiltration on 6 user baskets",
+    "attacker_ip": "lab-attacker",
+    "target": "10.10.30.130",
+    "evidence_source": "basket_dump.json"
+  },
+  {
+    "timestamp": "2026-03-12T00:19:00Z",
+    "severity": "HIGH",
+    "phase": "post-exploitation",
+    "signature": "Cross-user information leak on /rest/track-order/:id",
+    "attacker_ip": "lab-attacker",
+    "target": "10.10.30.130",
+    "evidence_source": "notes.md"
+  }
+]

@@ -1,0 +1,85 @@
+ALERT SUMMARY — bWAPP Blue Team Incident BLUE-2026-03-13-001
+Target: 10.10.30.128
+Mission Window: 2026-03-13T10:00:00Z to 2026-03-13T11:45:00Z
+Analysis Mode: Artifact Reconstruction (no live Suricata data — pivot to mission artifact analysis)
+
+NOTE: No Suricata/IDS live feed was available for this engagement. Alerts have been
+reconstructed from red team mission artifacts: timeline.log, exploit_findings.md,
+scan_findings.md, recon_findings.md, postex_findings.md, and loot/credentials.md.
+
+=== RECONSTRUCTED ALERT LOG ===
+
+[ALERT-001] SEVERITY: HIGH | TIME: 2026-03-13T10:00Z | TYPE: Reconnaissance
+  Sig: Automated HTTP directory enumeration against 10.10.30.128:80
+  Detail: Attacker walked /passwords/, /db/, /admin/, /documents/, /apps/, /soap/
+  Indicator: Sequential HTTP GET requests to multiple sensitive paths in short succession
+  Trigger: robots.txt parsed then all Disallow paths accessed within minutes
+
+[ALERT-002] SEVERITY: HIGH | TIME: 2026-03-13T10:05Z | TYPE: Sensitive File Download
+  Sig: Download of sensitive backup files from open directory
+  Detail: GET /passwords/wp-config.bak, GET /passwords/heroes.xml, GET /db/bwapp.sqlite
+  Indicator: Backup file extensions (.bak, .sqlite, .xml) downloaded from /passwords/ and /db/
+  Trigger: Direct downloads of credential-containing files — no auth required
+
+[ALERT-003] SEVERITY: MEDIUM | TIME: 2026-03-13T10:10Z | TYPE: Information Disclosure
+  Sig: Access to phpinfo.php — PHP configuration leak
+  Detail: GET /phpinfo.php returned full PHP environment including server paths, env vars
+  Indicator: Direct GET to phpinfo.php from external IP
+
+[ALERT-004] SEVERITY: HIGH | TIME: 2026-03-13T10:15Z | TYPE: Unauthenticated Admin Access
+  Sig: Admin portal accessed without authentication
+  Detail: GET /admin/index.php — 200 OK with no session challenge
+  Indicator: External source IP accessing /admin/ without prior authentication flow
+
+[ALERT-005] SEVERITY: CRITICAL | TIME: 2026-03-13T11:00Z | TYPE: Credential Leakage Exploit
+  Sig: Admin login using credentials from leaked config file
+  Detail: POST /login.php with login=A.I.M.&password=bug — successful 302 redirect to portal.php
+  Indicator: Successful admin authentication correlated with prior download of bwapp.sqlite
+
+[ALERT-006] SEVERITY: CRITICAL | TIME: 2026-03-13T11:05Z | TYPE: SQL Injection — Authentication Bypass
+  Sig: SQL injection payload detected in login parameter
+  Detail: POST /sqli_16.php — login parameter contained: bee' AND '1'='1' OR '1'='1
+  Indicator: Single-quote and SQL boolean logic in form field; tautological condition
+  MITRE: T1190 — Exploit Public-Facing Application
+
+[ALERT-007] SEVERITY: CRITICAL | TIME: 2026-03-13T11:10Z | TYPE: OS Command Injection / RCE
+  Sig: Shell metacharacter injection in DNS lookup form parameter
+  Detail: POST /commandi.php — target=www.nsa.gov; id
+  Indicator: Semicolon shell command separator in web form parameter
+  Response: Server returned "uid=33(www-data) gid=33(www-data)" — RCE confirmed
+  MITRE: T1059 — Command and Scripting Interpreter
+
+[ALERT-008] SEVERITY: HIGH | TIME: 2026-03-13T11:15Z | TYPE: Stored XSS Injection
+  Sig: Script tag injection into blog entry form
+  Detail: POST /xss_stored_1.php — entry=<script>alert(document.cookie)</script>
+  Indicator: HTML script tag in user-supplied form field stored in database
+  Downstream Risk: Every subsequent visitor executes attacker JavaScript — session hijack vector
+  MITRE: T1059.007 — JavaScript
+
+[ALERT-009] SEVERITY: HIGH | TIME: 2026-03-13T11:20Z | TYPE: Post-Exploitation Enumeration (via RCE)
+  Sig: System commands executed via web shell (OS CMDi pivot)
+  Detail: Via /commandi.php RCE — attacker read /etc/passwd, /app/admin/settings.php, ran mysql queries
+  Indicator: File read and database dump commands executed as www-data
+  Credentials Exposed: MySQL root with empty password confirmed via RCE
+
+=== ALERT STATISTICS ===
+
+Total Alerts Reconstructed: 9
+  CRITICAL: 3 (SQL Injection auth bypass, OS CMDi RCE, Credential leakage exploit)
+  HIGH:     5 (Directory enumeration, sensitive file downloads, admin access, stored XSS, post-ex)
+  MEDIUM:   1 (phpinfo disclosure)
+  LOW:      0
+
+Attack Phase Timeline:
+  10:00-10:30 — Recon/Scan: Directory traversal, sensitive file retrieval, info disclosure
+  10:30-10:45 — Enumeration: Vulnerability catalogue, endpoint mapping
+  11:00-11:15 — Exploitation: 4 confirmed exploits (broken auth, SQLi, RCE, stored XSS)
+  11:15-11:30 — Post-Exploitation: System enum, DB dump, credential harvest via RCE
+
+=== DETECTION GAPS ===
+
+1. No WAF/IPS rules triggered — application has no protective middleware
+2. No authentication anomaly detection — admin portal has no auth at all
+3. No SQL sanitization or parameterized queries — injection trivially successful
+4. No file integrity monitoring — backup files in web root undetected
+5. MySQL port 3306 exposed with no alerting on external connection attempts

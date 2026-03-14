@@ -1,0 +1,18 @@
+=== INDICATORS OF COMPROMISE ===
+Generated: 2026-03-13T12:38:00Z
+
+Network IOCs:
+  IP Addresses: lab-attacker
+  Domains/Hostnames: 10.10.30.130 (target)
+  Ports/Protocols: 3000/tcp (HTTP)
+  URIs/Paths: /api/Users, /rest/user/login, /rest/basket/:id, /api/BasketItems/:id, /api/BasketItems, /rest/track-order/:id
+
+Host IOCs:
+  Tools Deployed: curl, python3 (attacker side)
+  Commands Executed (key ones): curl -X POST /api/Users, curl GET /rest/basket/1, curl PUT /api/BasketItems/4
+  Files Modified/Accessed: /rest/basket/*, /api/BasketItems/*
+  Credentials Compromised: admin@juice-sh.op (Plaintext in notes.md), idortest@pwn.lab (User ID 24)
+
+Behavioral IOCs:
+  Attack pattern summary: Automated user enumeration followed by manual/scripted IDOR testing on sensitive API endpoints. Sequential scanning of basket IDs indicates an attempt to map and exfiltrate all user cart data.
+  Time window: 2026-03-12T00:01:00Z to 2026-03-12T00:21:00Z
