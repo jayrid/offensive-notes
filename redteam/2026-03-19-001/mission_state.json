@@ -1,0 +1,29 @@
+{
+  "mission_id": "2026-03-19-001",
+  "mission_dir": "/home/jayrid/RedTeam/missions/bwapp/2026-03-19-001",
+  "target": "10.10.30.128",
+  "target_type": "bwapp",
+  "current_phase": "complete",
+  "status": "complete",
+  "started_at": "2026-03-19T00:00:00Z",
+  "updated_at": "2026-03-19T01:20:00Z",
+  "completed_phases": ["recon", "scan", "enum", "exploit", "postex", "report"],
+  "failed_phase": null,
+  "plan_loaded": true,
+  "allowed_attack_types": [
+    "file_inclusion",
+    "ssrf",
+    "xxe",
+    "broken_auth",
+    "reconnaissance",
+    "enumeration",
+    "exploitation"
+  ],
+  "out_of_scope": [
+    "dos",
+    "social_engineering",
+    "physical_access"
+  ],
+  "max_exploits": 5,
+  "confirmed_exploit_count": 5
+}

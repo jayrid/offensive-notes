@@ -1,0 +1,68 @@
+CONSOLIDATED IOC LIST — BLUE-2026-03-19-001
+Target: 10.10.30.128 (bWAPP v2.2)
+Generated: 2026-03-19T02:02:25Z
+
+=============================================================================
+NETWORK IOCs
+=============================================================================
+
+Attacker workstation IP:  10.10.1.50 (confirmed via /proc/net/tcp)
+Target IP:                10.10.30.128
+Target ports attacked:    80/TCP (HTTP)
+Internal pivot target:    127.0.0.1:3306 (MySQL, via SSRF)
+
+HTTP URI patterns (high confidence):
+  /rlfi.php?language=/etc/
+  /rlfi.php?language=php://filter/
+  /xxe-2.php (POST with text/xml Content-Type)
+  /smgmt_admin_portal.php?admin=1
+  /login.php (POST with security_level=0 in body)
+
+HTTP header patterns:
+  Cookie: admin=1 (server-issued value is admin=0)
+  Cookie: security_level=0
+  Content-Type: text/xml; charset=UTF-8
+
+=============================================================================
+HOST-BASED IOCs
+=============================================================================
+
+Files accessed (www-data context):
+  /etc/passwd
+  /var/www/html/admin/settings.php
+  /var/www/html/bugs.txt
+  /var/www/html/rlfi.php
+  /var/www/html/xxe-2.php
+  /var/www/html/smgmt_admin_portal.php
+  /proc/net/tcp
+
+Database mutations:
+  Table: bWAPP.users
+  Column: secret
+  User: bee
+  Mutated value: content of /etc/passwd (injected via XXE)
+
+=============================================================================
+CREDENTIAL IOCs
+=============================================================================
+
+  Username: root      | Service: MySQL    | Password: (empty)
+  Username: bee       | Service: bWAPP    | Password: bug
+  Username: A.I.M.    | Service: bWAPP    | Password: bug
+  Session cookie:     PHPSESSID (no HttpOnly — theft-viable via XSS)
+
+=============================================================================
+BEHAVIORAL IOCs
+=============================================================================
+
+  1. Repeated GET requests to /rlfi.php with varying language parameter values
+  2. language parameter containing absolute paths (starts with /)
+  3. language parameter containing php://filter/convert.base64-encode/resource=
+  4. POST requests to /xxe-2.php containing DOCTYPE/ENTITY/SYSTEM keywords
+  5. XML parse error responses from /xxe-2.php ("StartTag: invalid element name")
+  6. GET /smgmt_admin_portal.php with query param admin=1
+  7. Cookie header containing admin=1 on requests to restricted endpoints
+  8. Login with POST body field security_level=0
+  9. Nmap SYN scan signature (multi-port rapid SYN from single IP)
+
+=============================================================================

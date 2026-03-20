@@ -1,0 +1,117 @@
+BLUE TEAM ALERT SUMMARY
+Incident ID: BLUE-2026-03-19-001
+Target: 10.10.30.128 (bWAPP v2.2)
+Mission: 2026-03-19-001
+Mode: ARTIFACT-ANALYSIS (no live Suricata eve.json available)
+Generated: 2026-03-19T02:00:10Z
+
+NOTE: Suricata IDS was not active during this engagement. Alerts below are
+reconstructed from mission timeline.log, commands.log, and exploit artifacts.
+This is consistent with prior bWAPP and DVWA engagements in this lab environment.
+
+=============================================================================
+RECONSTRUCTED ALERT FEED (chronological, threat-level descending)
+=============================================================================
+
+ALERT-001 [CRITICAL] LFI — Directory Traversal / PHP Wrapper Abuse
+  Time:     2026-03-19T00:30:00Z – 01:00:00Z
+  Source:   Attacker host
+  Dest:     10.10.30.128:80
+  Endpoint: GET /rlfi.php?language=/etc/passwd&action=go
+  Detail:   Unsanitized `language` parameter passed to PHP include().
+            Direct path traversal to /etc/passwd confirmed.
+  Rule cat: WEB_ATTACK / FILE_INCLUSION
+
+ALERT-002 [CRITICAL] LFI — PHP Filter Source Code Disclosure (DB Credentials)
+  Time:     2026-03-19T00:30:00Z – 01:00:00Z
+  Source:   Attacker host
+  Dest:     10.10.30.128:80
+  Endpoint: GET /rlfi.php?language=php://filter/convert.base64-encode/resource=admin/settings.php&action=go
+  Detail:   PHP stream wrapper used to base64-encode and exfiltrate source of
+            admin/settings.php — containing MySQL root credentials (empty password).
+            Multiple source files read: rlfi.php, xxe-2.php, smgmt_admin_portal.php, bugs.txt.
+  Rule cat: WEB_ATTACK / SENSITIVE_DATA_EXPOSURE
+
+ALERT-003 [CRITICAL] XXE Injection — External Entity File Exfiltration
+  Time:     2026-03-19T00:45:00Z – 01:00:00Z
+  Source:   Attacker host
+  Dest:     10.10.30.128:80
+  Endpoint: POST /xxe-2.php
+  Payload:  <?xml version="1.0" encoding="utf-8"?><!DOCTYPE reset [<!ENTITY xxe SYSTEM "file:///etc/passwd">]>...
+  Detail:   XML parser resolved SYSTEM entity file:///etc/passwd. Content stored in
+            MySQL users.secret column for bee user. External entity loading not disabled
+            (libxml_disable_entity_loader commented out). Affects ALL security levels.
+  Rule cat: WEB_ATTACK / XXE
+
+ALERT-004 [CRITICAL] SSRF via XXE — Internal Port Scan / MySQL Banner Exfil
+  Time:     2026-03-19T01:00:00Z
+  Source:   Attacker host
+  Dest:     10.10.30.128:80 (request); 127.0.0.1:3306 (internal pivot)
+  Endpoint: POST /xxe-2.php
+  Payload:  <!ENTITY xxe SYSTEM "http://127.0.0.1:3306/">
+  Detail:   XXE entity used HTTP wrapper to connect to MySQL on loopback.
+            MySQL TCP banner returned — confirmed by XML parse error on raw banner bytes.
+            Internal port scan viable via response timing: open ~42ms, closed ~96ms.
+  Rule cat: WEB_ATTACK / SSRF
+
+ALERT-005 [HIGH] Broken Authentication — URL Parameter Manipulation (Low Security)
+  Time:     2026-03-19T01:00:00Z
+  Source:   Attacker host
+  Dest:     10.10.30.128:80
+  Endpoint: GET /smgmt_admin_portal.php?admin=1
+  Detail:   Admin portal grants access when GET parameter admin=1 is supplied.
+            No server-side session validation. Access granted without any authentication.
+  Rule cat: WEB_ATTACK / BROKEN_AUTH
+
+ALERT-006 [HIGH] Broken Authentication — Cookie Manipulation (Medium Security)
+  Time:     2026-03-19T01:00:00Z
+  Source:   Attacker host
+  Dest:     10.10.30.128:80
+  Endpoint: GET /smgmt_admin_portal.php (cookie: admin=1)
+  Detail:   Admin cookie set client-side with no HttpOnly or Secure flags. Attacker
+            intercepted Set-Cookie: admin=0 and re-submitted admin=1 to gain admin access
+            at security_level=1 without valid credentials.
+  Rule cat: WEB_ATTACK / BROKEN_AUTH
+
+ALERT-007 [HIGH] Reconnaissance — Nmap Service Scan
+  Time:     2026-03-19T00:06:00Z – 00:15:00Z
+  Source:   Attacker host
+  Dest:     10.10.30.128
+  Detail:   Port scan targeting 80, 443, 8080, 8443, 21, 22, 3306, 8000, 8888 with
+            -sV -sC. Full port scan with --min-rate 2000. Services fingerprinted:
+            Apache/2.4.7, PHP 5.5.9. MySQL 3306 confirmed open.
+  Rule cat: RECON / PORT_SCAN
+
+ALERT-008 [MEDIUM] Session Downgrade — security_level=0 Cookie Injection
+  Time:     2026-03-19T00:01:00Z
+  Source:   Attacker host
+  Dest:     10.10.30.128:80
+  Endpoint: POST /login.php (security_level=0 in body)
+  Detail:   Login form accepts attacker-controlled security_level parameter.
+            Session cookie set to security_level=0, downgrading all protections.
+  Rule cat: WEB_ATTACK / AUTH_BYPASS
+
+ALERT-009 [MEDIUM] Sensitive File Enumeration — robots.txt Disclosure
+  Time:     2026-03-19T00:01:00Z – 00:05:00Z
+  Source:   Attacker host
+  Dest:     10.10.30.128:80
+  Detail:   robots.txt exposes /admin/, /documents/, /passwords/ directories.
+            Attacker confirmed paths and targeted admin/settings.php via LFI.
+  Rule cat: RECON / INFO_DISCLOSURE
+
+=============================================================================
+ALERT STATISTICS
+=============================================================================
+Total reconstructed alerts: 9
+  CRITICAL: 4
+  HIGH:     3
+  MEDIUM:   2
+  LOW:      0
+
+Attack surface hit: Web (HTTP/80), Internal pivot (MySQL 3306 via SSRF)
+Time window:        2026-03-19T00:01:00Z – 2026-03-19T01:00:00Z (~59 minutes)
+Phases covered:     recon, scan, enum, exploit, postex
+
+=============================================================================
+END OF ALERT SUMMARY
+=============================================================================

@@ -1,0 +1,9 @@
+# Nmap 7.95 scan initiated Thu Mar 19 20:32:02 2026 as: /usr/lib/nmap/nmap --privileged -p- --min-rate 2000 -oN /home/jayrid/RedTeam/missions/bwapp/2026-03-19-001/scan/nmap_full.txt 10.10.30.128
+Nmap scan report for 10.10.30.128
+Host is up (0.00073s latency).
+Not shown: 65533 closed tcp ports (reset)
+PORT     STATE SERVICE
+80/tcp   open  http
+3306/tcp open  mysql
+
+# Nmap done at Thu Mar 19 20:32:15 2026 -- 1 IP address (1 host up) scanned in 13.52 seconds

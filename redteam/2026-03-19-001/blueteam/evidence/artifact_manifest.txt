@@ -1,0 +1,81 @@
+EVIDENCE ARTIFACT MANIFEST
+Incident ID: BLUE-2026-03-19-001
+Target:      10.10.30.128 (bWAPP v2.2)
+Collected:   2026-03-19T02:01:10Z
+Collector:   blueteam-master (artifact-analysis mode)
+
+=============================================================================
+SOURCE ARTIFACT INDEX
+=============================================================================
+
+[MISSION CONTROL FILES]
+  /home/jayrid/RedTeam/missions/bwapp/2026-03-19-001/mission_state.json
+    - Mission ID, phase completion, target, allowed attack types
+    - Confirmed 5 exploits against 4 challenge IDs
+  /home/jayrid/RedTeam/missions/bwapp/2026-03-19-001/timeline.log
+    - Chronological record of all 7 mission phases with timestamps
+    - Source of truth for attack sequencing
+
+[COMMAND EVIDENCE]
+  /home/jayrid/RedTeam/missions/bwapp/2026-03-19-001/commands.log
+    - All shell commands executed during the engagement
+    - Covers recon, scan, enum+exploit phases
+    - 35 commands captured including: ping, curl (login, LFI, XXE, SSRF, auth bypass), nmap
+
+[RECON EVIDENCE]
+  /home/jayrid/RedTeam/missions/bwapp/2026-03-19-001/recon/recon_findings.md
+    - Target fingerprint: Apache/2.4.7, PHP 5.5.9, Ubuntu 14.04 (Docker)
+    - PHP config: allow_url_fopen=On, allow_url_include=Off, open_basedir=(none)
+    - Credentials confirmed: bee/bug, A.I.M./bug
+    - robots.txt disclosures: /admin/, /documents/, /passwords/
+    - 5 challenge endpoints mapped
+
+[SCAN EVIDENCE]
+  /home/jayrid/RedTeam/missions/bwapp/2026-03-19-001/scan/ (nmap output)
+    - Ports confirmed open: 80 (Apache), 3306 (MySQL)
+    - Full port scan + service version scan completed
+    - XXE endpoint discovered: xxe-2.php via LFI php://filter on bugs.txt
+
+[EXPLOIT EVIDENCE]
+  /home/jayrid/RedTeam/missions/bwapp/2026-03-19-001/exploit/exploit_lfi.md
+    - LFI via /rlfi.php language parameter
+    - Files exfiltrated: /etc/passwd, admin/settings.php (DB creds), source files
+    - PHP wrapper php://filter used to bypass text-only restrictions
+
+  /home/jayrid/RedTeam/missions/bwapp/2026-03-19-001/exploit/exploit_xxe_ssrf.md
+    - XXE at /xxe-2.php: file:///etc/passwd stored in DB via users.secret column
+    - SSRF at /xxe-2.php: http://127.0.0.1:3306/ — MySQL banner fetched
+    - libxml_disable_entity_loader commented out at all security levels
+
+  /home/jayrid/RedTeam/missions/bwapp/2026-03-19-001/exploit/exploit_broken_auth.md
+    - Low (level 0): GET ?admin=1 grants admin — no auth required
+    - Medium (level 1): Cookie admin=1 grants admin — no HttpOnly/Secure flags
+    - Cookie Set-Cookie: admin=0 intercepted and modified
+
+[POST-EXPLOITATION EVIDENCE]
+  /home/jayrid/RedTeam/missions/bwapp/2026-03-19-001/postex/postex_findings.md
+    - Kernel 6.8.0-100 (Docker host), container Ubuntu 14.04
+    - /proc/net/tcp read via LFI: MySQL 0.0.0.0:3306, Docker DNS 127.0.0.11
+    - Credentials exfiltrated: MySQL root (empty password), bee/bug, A.I.M./bug
+    - SSRF viable to 10.10.30.x range
+    - /etc/shadow not readable by www-data
+
+[LOOT FILES]
+  /home/jayrid/RedTeam/missions/bwapp/2026-03-19-001/loot/etc_passwd.txt
+    - Full /etc/passwd content from LFI and XXE exfiltration
+  /home/jayrid/RedTeam/missions/bwapp/2026-03-19-001/loot/db_credentials.txt
+    - MySQL root credentials (server:localhost, username:root, password:(empty), db:bWAPP)
+
+[MISSION REPORT]
+  /home/jayrid/RedTeam/missions/bwapp/2026-03-19-001/report/mission_report.md
+  /home/jayrid/RedTeam/missions/bwapp/2026-03-19-001/report/walkthrough.md
+
+=============================================================================
+INTEGRITY SUMMARY
+=============================================================================
+Total source files catalogued: 14
+Challenge IDs exploited:       4 (lfi_sensitive_data, ssrf_intranet_pivot,
+                                   xxe_injection_exfil, broken_auth_admin_takeover)
+Confirmed exploits:            5
+Credential files exfiltrated:  2 (etc_passwd.txt, db_credentials.txt)
+=============================================================================

@@ -1,0 +1,94 @@
+{
+  "mission_id": "2026-03-19-001",
+  "target": "10.10.30.128",
+  "target_type": "bwapp",
+  "target_url": "http://10.10.30.128/bWAPP/portal.php",
+  "created_at": "2026-03-19T00:00:00Z",
+  "status": "planned",
+  "primary_goal": "Escalate red team training against bWAPP by focusing on advanced server-side vulnerabilities: File Inclusion (LFI/RFI), SSRF, XXE, and Broken Authentication. Attempt to pivot from successful LFI to RFI for remote code execution.",
+  "challenge_ids": [
+    "lfi_sensitive_data",
+    "ssrf_intranet_pivot",
+    "xxe_injection_exfil",
+    "broken_auth_admin_takeover"
+  ],
+  "challenges": [
+    {
+      "id": "lfi_sensitive_data",
+      "name": "Local File Inclusion (Sensitive Data)",
+      "description": "Exploit Local File Inclusion vulnerabilities to read sensitive system files (e.g., /etc/passwd) and application source code. If successful, escalate to Remote File Inclusion (RFI) to achieve a reverse shell.",
+      "category": "Broken Access Control",
+      "difficulty": 4,
+      "attack_types": ["file_inclusion", "directory_traversal"],
+      "endpoints": ["/bWAPP/rlfi.php", "/bWAPP/directory_traversal_1.php"],
+      "success_criteria": "Reading /etc/passwd or critical application configuration files via LFI."
+    },
+    {
+      "id": "ssrf_intranet_pivot",
+      "name": "SSRF Intranet Pivot",
+      "description": "Leverage Server-Side Request Forgery to scan internal ports and services on the web server's local network, bypassing external firewall restrictions.",
+      "category": "SSRF",
+      "difficulty": 4,
+      "attack_types": ["ssrf", "enumeration"],
+      "endpoints": ["/bWAPP/ssrf-1.php", "/bWAPP/ssrf-2.php"],
+      "success_criteria": "Successful identification of an internal service or port via SSRF injection."
+    },
+    {
+      "id": "xxe_injection_exfil",
+      "name": "XXE Injection Exfiltration",
+      "description": "Exploit XML External Entity injection to read arbitrary server files and potentially perform server-side requests through insecure XML parsers.",
+      "category": "XXE",
+      "difficulty": 4,
+      "attack_types": ["xxe", "xml_injection"],
+      "endpoints": ["/bWAPP/xmli_1.php", "/bWAPP/xxe_1.php"],
+      "success_criteria": "Exfiltration of a target file (e.g., /etc/hostname) content using an XXE payload."
+    },
+    {
+      "id": "broken_auth_admin_takeover",
+      "name": "Broken Auth Admin Takeover",
+      "description": "Identify and exploit flaws in session management or authentication logic to gain administrative access to the bWAPP portal.",
+      "category": "Broken Authentication",
+      "difficulty": 4,
+      "attack_types": ["session_hijacking", "broken_auth", "insecure_cookies"],
+      "endpoints": ["/bWAPP/ba_admin_login.php", "/bWAPP/ba_cookies_1.php"],
+      "success_criteria": "Gaining authenticated access as the 'admin' user or accessing restricted admin features."
+    }
+  ],
+  "allowed_attack_types": [
+    "file_inclusion",
+    "ssrf",
+    "xxe",
+    "broken_auth",
+    "reconnaissance",
+    "enumeration",
+    "exploitation"
+  ],
+  "out_of_scope": {
+    "previously_exploited_vulnerabilities": [
+      "SQL Injection — Authentication Bypass Tautological OR (A03:2021)",
+      "OS Command Injection — Semicolon Chain RCE via escapeshellcmd() Bypass (A03:2021)",
+      "Stored XSS — Persistent Script Injection Blog Entry Session Hijack (A03:2021)",
+      "Sensitive Data Exposure — Open Directory Listings + Config Backup Credential Leakage (A05:2021 / A02:2021)"
+    ],
+    "attack_types": ["dos", "social_engineering", "physical_access"],
+    "notes": "Focus strictly on the four difficulty-4 challenge vectors. Do not re-exploit previously completed SQL injection, OS command injection, or XSS paths. Avoid blind_sqli_boolean_exfil, rfi_reverse_shell, and php_code_injection_exec (difficulty 5) — those are reserved for mission 3."
+  },
+  "learning_objectives": [
+    "Bypass LFI path traversal filters and extension checks using PHP wrappers (php://filter) and double-encoding",
+    "Identify SSRF injection points and use them for internal network port scanning and service discovery",
+    "Construct XXE payloads to exfiltrate local files via SYSTEM entities, understanding parser behavior differences",
+    "Analyze bWAPP session and authentication logic to perform privilege escalation to admin without valid credentials",
+    "Contrast medium-security filter behavior for file inclusion vs. the bypasses available via encoding and stream wrappers"
+  ],
+  "max_exploits": 5,
+  "security_level": "medium",
+  "credentials": {
+    "username": "bee",
+    "password": "bug"
+  },
+  "constraints": {
+    "stay_within_target_ip": true,
+    "no_dos_attacks": true,
+    "document_all_payloads": true
+  }
+}

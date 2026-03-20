@@ -1,0 +1,26 @@
+# Nmap 7.95 scan initiated Thu Mar 19 20:31:49 2026 as: /usr/lib/nmap/nmap --privileged -sV -sC -p 80,443,8080,8443,21,22,3306,8000,8888 -oN /home/jayrid/RedTeam/missions/bwapp/2026-03-19-001/scan/nmap_targeted.txt 10.10.30.128
+Nmap scan report for 10.10.30.128
+Host is up (0.0025s latency).
+
+PORT     STATE  SERVICE        VERSION
+21/tcp   closed ftp
+22/tcp   closed ssh
+80/tcp   open   http           Apache httpd 2.4.7 ((Ubuntu))
+| http-cookie-flags: 
+|   /: 
+|     PHPSESSID: 
+|_      httponly flag not set
+|_http-server-header: Apache/2.4.7 (Ubuntu)
+| http-title: bWAPP - Login
+|_Requested resource was login.php
+| http-robots.txt: 5 disallowed entries 
+|_/ /admin/ /documents/ /images/ /passwords/
+443/tcp  closed https
+3306/tcp open   mysql          MySQL (blocked - too many connection errors)
+8000/tcp closed http-alt
+8080/tcp closed http-proxy
+8443/tcp closed https-alt
+8888/tcp closed sun-answerbook
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Thu Mar 19 20:31:57 2026 -- 1 IP address (1 host up) scanned in 8.43 seconds

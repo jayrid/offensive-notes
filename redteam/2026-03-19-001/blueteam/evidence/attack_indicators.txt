@@ -1,0 +1,81 @@
+ATTACK INDICATORS — BLUE-2026-03-19-001
+Target: 10.10.30.128 (bWAPP v2.2)
+Generated: 2026-03-19T02:01:15Z
+
+=============================================================================
+BEHAVIORAL INDICATORS OF COMPROMISE (BEHAVIORAL IOCs)
+=============================================================================
+
+[LFI — Path Traversal]
+  Pattern:  GET parameter contains absolute filesystem paths or PHP wrappers
+  Evidence: language=/etc/passwd, language=php://filter/...resource=<file>
+  Endpoint: /rlfi.php
+  Signal:   Requests to rlfi.php with language param not matching expected [a-z]{2,5} locale pattern
+
+[LFI — PHP Wrapper Chain]
+  Pattern:  GET parameter contains php://filter/convert.base64-encode/resource=
+  Evidence: Attacker read admin/settings.php, xxe-2.php, smgmt_admin_portal.php, bugs.txt, rlfi.php
+  Signal:   Base64 blob in HTTP response body following php:// wrapper request
+
+[XXE — External Entity File Exfiltration]
+  Pattern:  POST body to XML-parsing endpoint contains <!DOCTYPE> with <!ENTITY SYSTEM "file://...">
+  Evidence: POST /xxe-2.php with file:///etc/passwd entity
+  Signal:   POST requests to /xxe-2.php with Content-Type text/xml; charset=UTF-8
+
+[XXE/SSRF — Internal HTTP Entity]
+  Pattern:  POST XML body with <!ENTITY SYSTEM "http://127.0.0.1:<port>/">
+  Evidence: http://127.0.0.1:3306/ — MySQL banner returned
+  Signal:   XML parse errors containing "StartTag: invalid element name" after POST to xxe-2.php
+
+[Broken Auth — URL Parameter]
+  Pattern:  GET ?admin=1 on admin-restricted pages
+  Evidence: GET /smgmt_admin_portal.php?admin=1
+  Signal:   Query parameter admin=1 on smgmt_admin_portal.php
+
+[Broken Auth — Cookie Manipulation]
+  Pattern:  Cookie header manually set with admin=1
+  Evidence: Cookie: PHPSESSID=...; security_level=1; admin=1
+  Signal:   admin cookie value deviates from server-issued admin=0
+
+[Session Security Downgrade]
+  Pattern:  Login POST with attacker-controlled security_level=0
+  Evidence: POST /login.php with security_level=0 in body
+  Signal:   security_level=0 in cookie on subsequent requests
+
+[Reconnaissance]
+  Pattern:  Port scan traffic from single source IP to multiple TCP ports
+  Evidence: nmap -sV -sC -p 80,443,8080,8443,21,22,3306,8000,8888; full port scan
+  Signal:   Rapid SYN packets to >5 ports in <1s from single IP
+
+=============================================================================
+POST-EXPLOITATION INDICATORS
+=============================================================================
+
+  - Reads of /proc/net/tcp via LFI (reveals internal service map)
+  - reads of /etc/passwd via both LFI and XXE (doubled exfiltration paths)
+  - MySQL 3306 probed via SSRF/XXE (even if not publicly exposed)
+  - Session cookie PHPSESSID has no HttpOnly flag — XSS session theft viable
+  - MySQL users table likely queried if attacker escalated to DB access
+
+=============================================================================
+FILE SYSTEM ACCESS TRACE
+=============================================================================
+
+Files accessed by attacker (www-data context):
+  /etc/passwd                      [EXFILTRATED — LFI + XXE]
+  /var/www/html/admin/settings.php [EXFILTRATED — LFI php://filter]
+  /var/www/html/bugs.txt           [EXFILTRATED — LFI php://filter]
+  /var/www/html/rlfi.php           [EXFILTRATED — LFI php://filter]
+  /var/www/html/xxe-2.php          [EXFILTRATED — LFI php://filter]
+  /var/www/html/smgmt_admin_portal.php [EXFILTRATED — LFI php://filter]
+  /proc/net/tcp                    [READ — LFI, internal network map]
+
+=============================================================================
+CREDENTIAL COMPROMISE SUMMARY
+=============================================================================
+
+  MySQL root   | password: (empty) | Source: admin/settings.php via LFI
+  bee          | password: bug     | Source: known from login; DB confirmed
+  A.I.M.       | password: bug     | Source: known from login; admin user
+
+=============================================================================

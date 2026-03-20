@@ -1,0 +1,80 @@
+SEVERITY RATING — BLUE-2026-03-19-001
+Target: 10.10.30.128 (bWAPP v2.2)
+Generated: 2026-03-19T02:02:30Z
+
+=============================================================================
+OVERALL INCIDENT SEVERITY: CRITICAL
+=============================================================================
+
+Rationale:
+  - 4 independently CRITICAL exploits (each capable of high-impact compromise alone)
+  - MySQL root credentials exfiltrated — full database compromise
+  - Sensitive system files exfiltrated (/etc/passwd)
+  - Admin portal taken over at two security levels (0 and 1)
+  - Internal services mapped via SSRF — lateral movement pathway confirmed
+  - Source code of all target files disclosed — enables further white-box attacks
+  - PHP source code exfil bypasses application-layer protections entirely
+  - No authentication required for most exploits (admin=1 param, direct LFI)
+  - EOL OS (Ubuntu 14.04) + EOL PHP (5.5.9) + no IDS coverage
+
+=============================================================================
+PER-EXPLOIT CVSS v3.1 RATINGS
+=============================================================================
+
+Exploit 1: LFI — Path Traversal (/etc/passwd)
+  CVSS Vector:  AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N
+  CVSS Score:   6.5 (HIGH)
+  Notes:        Requires valid session (low privilege), no impact on integrity
+
+Exploit 2: LFI — PHP Wrapper Source Code / DB Credential Disclosure
+  CVSS Vector:  AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N
+  CVSS Score:   9.1 (CRITICAL) — elevated for credential exposure
+  Notes:        MySQL root credentials = full DB compromise; multiplier effect
+
+Exploit 3: XXE — File Exfiltration + DB Write
+  CVSS Vector:  AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:N
+  CVSS Score:   8.1 (HIGH)
+  Notes:        Integrity impact from DB mutation (users.secret overwrite)
+
+Exploit 4: SSRF via XXE — Internal Port Scan / MySQL Banner
+  CVSS Vector:  AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N
+  CVSS Score:   9.1 (CRITICAL) — Scope changed (C:H out-of-scope network access)
+  Notes:        Internal service reachability enables further pivot attacks
+
+Exploit 5: Broken Auth — URL Parameter (?admin=1)
+  CVSS Vector:  AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N
+  CVSS Score:   9.1 (CRITICAL)
+  Notes:        No privileges required; direct admin access; trivially exploitable
+
+Exploit 6: Broken Auth — Cookie Manipulation (admin=1)
+  CVSS Vector:  AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:N
+  CVSS Score:   8.1 (HIGH)
+  Notes:        Low privilege (valid session) required; admin access achieved
+
+=============================================================================
+AGGREGATE RISK FACTORS
+=============================================================================
+
+  Attack Surface:       External (HTTP/80) — no firewall bypass needed
+  Authentication Req:   Minimal — bee/bug is a public test account
+  Exploit Complexity:   Low — all exploits via standard curl commands
+  Detection Difficulty: High — no IDS; all attacks blend with app traffic
+  Business Impact:      Full DB access, admin takeover, internal pivot viable
+  Remediation Effort:   High — requires code fixes at multiple layers
+
+=============================================================================
+PRIORITY REMEDIATION ORDER
+=============================================================================
+
+  P0 (Immediate): MySQL root empty password — set strong password NOW
+  P0 (Immediate): libxml_disable_entity_loader — uncomment or use LIBXML_NOENT
+  P1 (Critical):  LFI — whitelist language parameter; set open_basedir
+  P1 (Critical):  Broken auth — move authorization to $_SESSION, never GET/cookie
+  P2 (High):      Cookie flags — HttpOnly + Secure on all session cookies
+  P2 (High):      security_level — do not accept from user input; server-controlled
+  P3 (Medium):    display_errors=0 in production; suppress error details
+  P3 (Medium):    phpinfo.php — remove from public web root
+  P4 (Low):       Ubuntu 14.04 EOL — migrate to supported OS
+  P4 (Low):       PHP 5.5.9 EOL — migrate to PHP 8.x
+
+=============================================================================

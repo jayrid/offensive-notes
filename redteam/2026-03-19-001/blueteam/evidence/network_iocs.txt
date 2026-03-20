@@ -1,0 +1,108 @@
+NETWORK IOCs — BLUE-2026-03-19-001
+Target: 10.10.30.128 (bWAPP v2.2)
+Generated: 2026-03-19T02:01:20Z
+
+=============================================================================
+NETWORK INDICATORS OF COMPROMISE
+=============================================================================
+
+[HTTP REQUEST SIGNATURES — HIGH FIDELITY DETECTIONS]
+
+  1. LFI — Absolute Path
+     Method:  GET
+     URI:     /rlfi.php?language=/etc/passwd&action=go
+     Pattern: language param contains / (slash-prefixed absolute path)
+     HTTP sig: \?language=\/[a-z]
+
+  2. LFI — PHP Wrapper
+     Method:  GET
+     URI:     /rlfi.php?language=php://filter/convert.base64-encode/resource=<path>
+     Pattern: language param contains php://
+     HTTP sig: \?language=php%3A%2F%2F or ?language=php://
+
+  3. XXE — file:// Entity Injection
+     Method:  POST
+     URI:     /xxe-2.php
+     Header:  Content-Type: text/xml
+     Body:    Contains DOCTYPE + SYSTEM + file://
+     Pattern: <!ENTITY.*SYSTEM.*file:///
+     HTTP sig: POST body contains "<!ENTITY" + "SYSTEM" + "file://"
+
+  4. SSRF — XXE HTTP Entity
+     Method:  POST
+     URI:     /xxe-2.php
+     Body:    <!ENTITY xxe SYSTEM "http://127.0.0.1:<port>/">
+     Pattern: SYSTEM entity with http://127. or http://10. or http://192.168.
+     HTTP sig: POST body contains "SYSTEM" + "http://127."
+
+  5. Broken Auth — URL Param
+     Method:  GET
+     URI:     /smgmt_admin_portal.php?admin=1
+     Pattern: query string contains admin=1 on restricted endpoint
+     HTTP sig: GET /smgmt_admin_portal.php.*admin=1
+
+  6. Broken Auth — Cookie
+     Method:  GET/POST
+     Header:  Cookie contains admin=1 (not matching server-issued admin=0)
+     HTTP sig: Cookie:.*admin=1
+
+  7. Security Downgrade
+     Method:  POST
+     URI:     /login.php
+     Body:    security_level=0
+     HTTP sig: POST /login.php.*security_level=0
+
+[NETWORK FLOW INDICATORS]
+
+  Source Port Range: Ephemeral (attacker; standard)
+  Dest Port:         80/TCP (primary)
+  Dest Port probed:  3306/TCP (via SSRF — internal only, not direct)
+  Protocol:          HTTP/1.1
+
+  Volume anomaly:
+    - Multiple rapid GET requests to /rlfi.php with varying `language` values
+    - Clustered POST requests to /xxe-2.php within a short time window
+    - Nmap SYN scan producing SYN packets to 9 ports within ~2ms each
+
+[KNOWN ATTACKER ACTIVITY PERIOD]
+  Start: 2026-03-19T00:01:00Z (first login/recon)
+  End:   2026-03-19T01:00:00Z (last exploit confirmed)
+  Duration: ~59 minutes
+
+[INTERNAL PIVOT INDICATORS]
+  - Server-side HTTP request from 10.10.30.128 to 127.0.0.1:3306
+    (SSRF-triggered; not attacker-to-server traffic)
+  - /proc/net/tcp reveals: established outbound connection to 10.10.1.50:52898
+    (lab host attacker workstation confirmed in network table)
+  - Docker DNS at 127.0.0.11 discovered — container context confirmed
+
+=============================================================================
+RECOMMENDED SURICATA/SNORT RULES (Conceptual)
+=============================================================================
+
+  alert http any any -> $HTTP_SERVERS 80 (
+    msg:"LFI PHP Wrapper Detected";
+    content:"language=php://"; http_uri;
+    sid:1000001; rev:1;)
+
+  alert http any any -> $HTTP_SERVERS 80 (
+    msg:"XXE External Entity POST Detected";
+    content:"POST"; http_method;
+    content:"/xxe"; http_uri;
+    content:"SYSTEM"; http_client_body;
+    content:"<!ENTITY"; http_client_body;
+    sid:1000002; rev:1;)
+
+  alert http any any -> $HTTP_SERVERS 80 (
+    msg:"Broken Auth URL Param admin=1";
+    content:"admin=1"; http_uri;
+    content:"/smgmt_admin_portal"; http_uri;
+    sid:1000003; rev:1;)
+
+  alert http any any -> $HTTP_SERVERS 80 (
+    msg:"bWAPP Security Level Downgrade";
+    content:"POST"; http_method;
+    content:"security_level=0"; http_client_body;
+    sid:1000004; rev:1;)
+
+=============================================================================

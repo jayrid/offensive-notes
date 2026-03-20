@@ -1,0 +1,144 @@
+MITRE ATT&CK MAPPING — BLUE-2026-03-19-001
+Target: 10.10.30.128 (bWAPP v2.2)
+Generated: 2026-03-19T02:02:20Z
+Framework: MITRE ATT&CK v14 — Enterprise + ICS (Web Application focus)
+
+=============================================================================
+TACTIC: RECONNAISSANCE (TA0043)
+=============================================================================
+
+T1595.001 — Active Scanning: Scanning IP Blocks
+  Evidence: nmap -p- --min-rate 2000 10.10.30.128 (full port scan)
+
+T1595.002 — Active Scanning: Vulnerability Scanning
+  Evidence: nmap -sV -sC targeting service versions + default scripts
+
+T1592.002 — Gather Victim Host Information: Software
+  Evidence: phpinfo.php enumeration — PHP version, config flags, document root
+
+T1589.001 — Gather Victim Identity Information: Credentials
+  Evidence: login.php probed with known creds (bee/bug) to establish session
+
+T1590.005 — Gather Victim Network Information: IP Addresses
+  Evidence: /proc/net/tcp read via LFI — internal socket table mapped
+
+=============================================================================
+TACTIC: INITIAL ACCESS (TA0001)
+=============================================================================
+
+T1190 — Exploit Public-Facing Application
+  Evidence: LFI via /rlfi.php (unsanitized include), XXE via /xxe-2.php
+  Sub-tech: CWE-98 (PHP File Inclusion), CWE-611 (XXE)
+
+=============================================================================
+TACTIC: EXECUTION (TA0002)
+=============================================================================
+
+T1059.007 — Command and Scripting Interpreter: JavaScript (N/A this mission)
+
+Note: No direct code execution achieved this mission (allow_url_include=Off
+blocked php://input shell). XXE/SSRF provided server-side request execution.
+
+=============================================================================
+TACTIC: COLLECTION (TA0009)
+=============================================================================
+
+T1005 — Data from Local System
+  Evidence: /etc/passwd read via LFI and XXE; admin/settings.php read via LFI;
+            /proc/net/tcp read via LFI (network topology collection)
+
+T1213 — Data from Information Repositories
+  Evidence: bugs.txt (challenge map) read via LFI php://filter;
+            5 PHP source files extracted (source code as data collection)
+
+T1552.001 — Unsecured Credentials: Credentials in Files
+  Evidence: admin/settings.php exfiltrated via LFI — MySQL root/empty password
+
+=============================================================================
+TACTIC: CREDENTIAL ACCESS (TA0006)
+=============================================================================
+
+T1552.001 — Unsecured Credentials: Credentials in Files
+  Evidence: MySQL root credentials in /var/www/html/admin/settings.php (plaintext)
+
+T1078.001 — Valid Accounts: Default Accounts
+  Evidence: MySQL root with empty password — factory/default credential state
+
+=============================================================================
+TACTIC: DISCOVERY (TA0007)
+=============================================================================
+
+T1082 — System Information Discovery
+  Evidence: /etc/passwd read — OS user accounts; phpinfo.php — PHP/Apache config
+
+T1049 — System Network Connections Discovery
+  Evidence: /proc/net/tcp read via LFI — all active TCP connections revealed
+
+T1046 — Network Service Scanning
+  Evidence: SSRF via XXE probing 127.0.0.1:80, :22, :3306 — internal port scan;
+            timing-based differentiation of open vs closed ports
+
+T1083 — File and Directory Discovery
+  Evidence: robots.txt disclosure of /admin/, /documents/, /passwords/;
+            bugs.txt read to enumerate all challenge endpoints
+
+=============================================================================
+TACTIC: LATERAL MOVEMENT (TA0008)
+=============================================================================
+
+T1599 — Network Boundary Bridging (partial)
+  Evidence: SSRF via XXE enabled server to issue requests to 127.0.0.1 services.
+            Full lateral movement to 10.10.30.x range viable but not executed.
+
+=============================================================================
+TACTIC: EXFILTRATION (TA0010)
+=============================================================================
+
+T1041 — Exfiltration Over C2 Channel
+  Evidence: File contents returned in HTTP responses (LFI direct + base64);
+            deferred: XXE stored /etc/passwd in MySQL users.secret column
+
+=============================================================================
+TACTIC: IMPACT (TA0040)
+=============================================================================
+
+T1565.001 — Data Manipulation: Stored Data Manipulation
+  Evidence: XXE exploit stored attacker-controlled content (/etc/passwd) in
+            MySQL bWAPP database, overwriting bee's secret field
+
+=============================================================================
+TACTIC: PRIVILEGE ESCALATION (TA0004)
+=============================================================================
+
+T1548 — Abuse Elevation Control Mechanism
+  Evidence: Broken auth — URL param ?admin=1 and cookie admin=1 bypass
+            authorization checks; attacker elevated to admin role without
+            possessing admin credentials
+
+=============================================================================
+VULNERABILITY CWE MAPPING
+=============================================================================
+
+CWE-98  — Improper Control of Filename for Include/Require in PHP (LFI)
+CWE-611 — Improper Restriction of XML External Entity Reference (XXE)
+CWE-918 — Server-Side Request Forgery (SSRF via XXE)
+CWE-639 — Authorization Bypass Through User-Controlled Key (Broken Auth URL param)
+CWE-565 — Reliance on Cookies Without Validation (Broken Auth cookie)
+CWE-256 — Plaintext Storage of a Password (MySQL root empty pwd in settings.php)
+CWE-732 — Incorrect Permission Assignment (open_basedir not set)
+CWE-209 — Generation of Error Message Containing Sensitive Information (display_errors=1)
+
+=============================================================================
+OWASP TOP 10 2021 MAPPING
+=============================================================================
+
+A01:2021 — Broken Access Control         (LFI, broken auth, admin bypass)
+A02:2021 — Cryptographic Failures        (HTTP only, no TLS; plaintext creds)
+A05:2021 — Security Misconfiguration     (XXE entity loader disabled commented out;
+                                           display_errors=1; open_basedir not set;
+                                           allow_url_fopen=On)
+A07:2021 — Identification/Auth Failures  (broken auth URL param + cookie)
+A09:2021 — Security Logging/Monitoring   (no IDS/SIEM active during engagement)
+A10:2021 — SSRF                          (XXE HTTP entity to 127.0.0.1:3306)
+
+=============================================================================

@@ -1,0 +1,19 @@
+[2026-03-19T00:00:00Z] [PLAN] Mission 2026-03-19-001 created. Target: bWAPP @ 10.10.30.128. Challenges: lfi_sensitive_data, ssrf_intranet_pivot, xxe_injection_exfil, broken_auth_admin_takeover.
+2026-03-19T00:01:00Z [MASTER] MISSION STARTED | Target: 10.10.30.128 | Type: bwapp | Mission ID: 2026-03-19-001
+2026-03-19T00:01:00Z [MASTER] MISSION PLAN LOADED | target_type: bwapp | allowed_attack_types: file_inclusion, ssrf, xxe, broken_auth, reconnaissance, enumeration, exploitation | objectives: lfi_sensitive_data, ssrf_intranet_pivot, xxe_injection_exfil, broken_auth_admin_takeover
+2026-03-19T00:01:00Z [MASTER] PHASE STARTED: recon
+2026-03-19T00:05:00Z [MASTER] PHASE COMPLETED: recon | Findings: Target confirmed Apache/2.4.7+PHP/5.5.9 on Ubuntu 14.04. allow_url_include=Off (RFI blocked), open_basedir=none (LFI unrestricted). Endpoints confirmed: /rlfi.php (LFI), /smgmt_admin_portal.php (broken auth), /xmli_1.php (XML). SSRF and XXE endpoints not resolved by name — require enum. Session downgrade via security_level=0 still valid.
+2026-03-19T00:06:00Z [MASTER] PHASE STARTED: scan
+2026-03-19T00:15:00Z [MASTER] PHASE COMPLETED: scan | Findings: Ports 80 (HTTP) and 3306 (MySQL) only. Full endpoint map obtained via php://filter LFI on rlfi.php reading bugs.txt. XXE endpoint confirmed: xxe-2.php accepts POST text/xml. SSRF via RFI blocked (allow_url_include=Off); SSRF via XXE SYSTEM entity to be tested. Broken auth at smgmt_admin_portal.php confirmed.
+2026-03-19T00:15:00Z [MASTER] PHASE STARTED: enum
+2026-03-19T00:30:00Z [MASTER] PHASE COMPLETED: enum | Findings: LFI at level-0 is fully unsanitized — confirmed /etc/passwd and full source reads via php://filter. XXE source: simplexml_load_string() with external entities enabled at all levels (libxml_disable_entity_loader commented out). Broken auth check: level-0=GET admin=1, level-1=cookie admin=1, level-2=session admin. SSRF achievable via XXE SYSTEM http:// entity. Exploit plan ready.
+2026-03-19T00:30:00Z [MASTER] PHASE STARTED: exploit
+2026-03-19T01:00:00Z [MASTER] PHASE COMPLETED: exploit | confirmed_exploit_count: 5 | Exploits: (1) LFI /etc/passwd + config creds via php://filter; (2) XXE file:// exfil to DB; (3) SSRF via XXE http:// entity — MySQL banner fetched port 3306; (4) Broken auth low — GET admin=1; (5) Broken auth medium — cookie admin=1.
+2026-03-19T01:00:00Z [MASTER] MISSION GOAL SATISFIED | confirmed_exploits: 5 / max_exploits: 5 | Proceeding to post-exploitation.
+2026-03-19T01:00:00Z [MASTER] PHASE STARTED: postex
+2026-03-19T01:10:00Z [MASTER] PHASE COMPLETED: postex | Findings: Kernel 6.8.0 (Docker). /proc/net/tcp: MySQL on 0.0.0.0:3306, Docker DNS 127.0.0.11. Credentials exfiltrated: MySQL root/empty, bee/bug, A.I.M./bug. /etc/shadow not readable. SSRF lateral movement viable to 10.10.30.x range. Web shell via LFI blocked (allow_url_include=Off).
+2026-03-19T01:10:00Z [MASTER] PHASE STARTED: report
+2026-03-19T01:20:00Z [MASTER] PHASE COMPLETED: report | Artifacts: report/mission_report.md, report/walkthrough.md
+2026-03-19T01:20:00Z [MASTER] MISSION COMPLETE | Mission ID: 2026-03-19-001 | Report: report/mission_report.md
+2026-03-19T01:20:00Z [MASTER] MISSION GOAL SATISFIED | Reason: all phases complete | Mission ID: 2026-03-19-001
+2026-03-19T01:20:00Z [MASTER] INDEX UPDATED | missions/index.json | exploits recorded: 5 | challenge_ids: lfi_sensitive_data, ssrf_intranet_pivot, xxe_injection_exfil, broken_auth_admin_takeover

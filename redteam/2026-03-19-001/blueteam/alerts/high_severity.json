@@ -1,0 +1,86 @@
+[
+  {
+    "alert_id": "ALERT-001",
+    "severity": "CRITICAL",
+    "category": "WEB_ATTACK/FILE_INCLUSION",
+    "timestamp": "2026-03-19T00:30:00Z",
+    "endpoint": "/rlfi.php",
+    "method": "GET",
+    "parameter": "language",
+    "payload_type": "path_traversal",
+    "payload_example": "/etc/passwd",
+    "impact": "Full filesystem read as www-data, /etc/passwd exfiltrated"
+  },
+  {
+    "alert_id": "ALERT-002",
+    "severity": "CRITICAL",
+    "category": "WEB_ATTACK/SENSITIVE_DATA_EXPOSURE",
+    "timestamp": "2026-03-19T00:35:00Z",
+    "endpoint": "/rlfi.php",
+    "method": "GET",
+    "parameter": "language",
+    "payload_type": "php_wrapper",
+    "payload_example": "php://filter/convert.base64-encode/resource=admin/settings.php",
+    "impact": "MySQL root credentials (empty password) exfiltrated from admin/settings.php"
+  },
+  {
+    "alert_id": "ALERT-003",
+    "severity": "CRITICAL",
+    "category": "WEB_ATTACK/XXE",
+    "timestamp": "2026-03-19T00:45:00Z",
+    "endpoint": "/xxe-2.php",
+    "method": "POST",
+    "parameter": "XML body",
+    "payload_type": "xxe_file_entity",
+    "payload_example": "<!ENTITY xxe SYSTEM \"file:///etc/passwd\">",
+    "impact": "/etc/passwd content stored in MySQL database via deferred exfiltration"
+  },
+  {
+    "alert_id": "ALERT-004",
+    "severity": "CRITICAL",
+    "category": "WEB_ATTACK/SSRF",
+    "timestamp": "2026-03-19T01:00:00Z",
+    "endpoint": "/xxe-2.php",
+    "method": "POST",
+    "parameter": "XML body",
+    "payload_type": "xxe_ssrf_http_entity",
+    "payload_example": "<!ENTITY xxe SYSTEM \"http://127.0.0.1:3306/\">",
+    "impact": "Internal MySQL service reached; banner exfiltrated; internal port scan viable"
+  },
+  {
+    "alert_id": "ALERT-005",
+    "severity": "HIGH",
+    "category": "WEB_ATTACK/BROKEN_AUTH",
+    "timestamp": "2026-03-19T01:00:00Z",
+    "endpoint": "/smgmt_admin_portal.php",
+    "method": "GET",
+    "parameter": "admin",
+    "payload_type": "url_param_manipulation",
+    "payload_example": "admin=1",
+    "impact": "Admin portal access without authentication at security_level=0"
+  },
+  {
+    "alert_id": "ALERT-006",
+    "severity": "HIGH",
+    "category": "WEB_ATTACK/BROKEN_AUTH",
+    "timestamp": "2026-03-19T01:00:00Z",
+    "endpoint": "/smgmt_admin_portal.php",
+    "method": "GET",
+    "parameter": "admin (cookie)",
+    "payload_type": "cookie_manipulation",
+    "payload_example": "Cookie: admin=1",
+    "impact": "Admin portal access by manipulating client-side cookie at security_level=1"
+  },
+  {
+    "alert_id": "ALERT-007",
+    "severity": "HIGH",
+    "category": "RECON/PORT_SCAN",
+    "timestamp": "2026-03-19T00:06:00Z",
+    "endpoint": "10.10.30.128",
+    "method": "TCP",
+    "parameter": "multi-port",
+    "payload_type": "nmap_scan",
+    "payload_example": "nmap -sV -sC -p 80,443,8080,8443,21,22,3306,8000,8888",
+    "impact": "Full service fingerprint obtained; Apache/PHP/MySQL versions exposed"
+  }
+]
